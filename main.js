@@ -1,23 +1,22 @@
 // get canvas related references
-var canvas = document.getElementById("canvas");
+let canvas = document.getElementById("canvas");
 
 canvas.width = $(window).width();
 canvas.height = $(window).height();
 
-var ctx = canvas.getContext("2d");
-var BB = canvas.getBoundingClientRect();
-var offsetX = BB.left;
-var offsetY = BB.top;
-var WIDTH = canvas.width;
-var HEIGHT = canvas.height;
+let ctx = canvas.getContext("2d");
+let BB = canvas.getBoundingClientRect();
+let offsetX = BB.left;
+let offsetY = BB.top;
+let WIDTH = canvas.width;
+let HEIGHT = canvas.height;
 
-// drag related variables
-var dragok = false;
-var startX;
-var startY;
+let dragok = false;
+let startX;
+let startY;
 
 // an array of objects that define different rectangles
-var rects = [];
+let rects = [];
 rects.push({
     x: 75 - 15,
     y: 50 - 15,
@@ -51,10 +50,13 @@ rects.push({
     isDragging: false
 });
 
-// listen for mouse events
 canvas.onmousedown = myDown;
 canvas.onmouseup = myUp;
 canvas.onmousemove = myMove;
+
+canvas.ontouchstart = myDown;
+canvas.ontouchend = myUp;
+canvas.ontouchmove = myMove;
 
 // call to draw the scene
 draw();
@@ -78,33 +80,34 @@ function draw() {
     ctx.fillStyle = "#FAF7F8";
     rect(0, 0, WIDTH, HEIGHT);
     // redraw each rect in the rects[] array
-    for (var i = 0; i < rects.length; i++) {
-        var r = rects[i];
+    for (let i = 0; i < rects.length; i++) {
+        let r = rects[i];
         ctx.fillStyle = r.fill;
         rect(r.x, r.y, r.width, r.height);
     }
 }
 
-
-// handle mousedown events
 function myDown(e) {
 
     // tell the browser we're handling this mouse event
     e.preventDefault();
     e.stopPropagation();
 
-    // get the current mouse position
-    var mx = parseInt(e.clientX - offsetX);
-    var my = parseInt(e.clientY - offsetY);
+    let x = e.clientX ?? e.targetTouches[0].clientX;
+    let y = e.clientY ?? e.targetTouches[0].clientY;
 
-    // test each rect to see if mouse is inside
+    // get the current mouse position
+    let mx = parseInt(x - offsetX);
+    let my = parseInt(y - offsetY);
+
     dragok = false;
-    for (var i = 0; i < rects.length; i++) {
-        var r = rects[i];
+    for (let i = rects.length - 1; i >= 0; i--) {
+        let r = rects[i];
         if (mx > r.x && mx < r.x + r.width && my > r.y && my < r.y + r.height) {
             // if yes, set that rects isDragging=true
             dragok = true;
             r.isDragging = true;
+            break;
         }
     }
     // save the current mouse position
@@ -112,8 +115,6 @@ function myDown(e) {
     startY = my;
 }
 
-
-// handle mouseup events
 function myUp(e) {
     // tell the browser we're handling this mouse event
     e.preventDefault();
@@ -121,13 +122,11 @@ function myUp(e) {
 
     // clear all the dragging flags
     dragok = false;
-    for (var i = 0; i < rects.length; i++) {
+    for (let i = 0; i < rects.length; i++) {
         rects[i].isDragging = false;
     }
 }
 
-
-// handle mouse moves
 function myMove(e) {
     // if we're dragging anything...
     if (dragok) {
@@ -136,20 +135,23 @@ function myMove(e) {
         e.preventDefault();
         e.stopPropagation();
 
+        let x = e.clientX ?? e.targetTouches[0].clientX;
+        let y = e.clientY ?? e.targetTouches[0].clientY;
+
         // get the current mouse position
-        var mx = parseInt(e.clientX - offsetX);
-        var my = parseInt(e.clientY - offsetY);
+        let mx = parseInt(x - offsetX);
+        let my = parseInt(y - offsetY);
 
         // calculate the distance the mouse has moved
         // since the last mousemove
-        var dx = mx - startX;
-        var dy = my - startY;
+        let dx = mx - startX;
+        let dy = my - startY;
 
         // move each rect that isDragging
         // by the distance the mouse has moved
         // since the last mousemove
-        for (var i = 0; i < rects.length; i++) {
-            var r = rects[i];
+        for (let i = 0; i < rects.length; i++) {
+            let r = rects[i];
             if (r.isDragging) {
                 r.x += dx;
                 r.y += dy;
@@ -165,4 +167,3 @@ function myMove(e) {
 
     }
 }
-
