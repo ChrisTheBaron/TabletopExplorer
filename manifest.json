@@ -1,0 +1,19 @@
+{
+  "name": "Tabletop Explorer",
+  "short_name": "Tabletop Explorer",
+  "lang": "en-GB",
+  "start_url": "https://tabletop-explorer.christhebaron.co.uk",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/images/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
