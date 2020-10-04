@@ -10,13 +10,6 @@ if (window.localStorage.getItem("zoom") != null) {
     globalZoom = parseFloat(window.localStorage.getItem("zoom"));
 }
 
-$(document).ready(() => {
-    $('#dropdownZoom~ul>li>a').click((e) => {
-        window.localStorage.setItem('zoom', $(e.target).attr('data-value'));
-        location.reload();
-    });
-});
-
 canvas.width = image.naturalWidth * imageZoom * globalZoom;
 canvas.height = image.naturalHeight * imageZoom * globalZoom;
 
@@ -34,6 +27,10 @@ let startY;
 
 // an array of objects that define different rectangles
 let rects = [];
+
+if (window.localStorage["rects"] == null) {
+    window.localStorage["rects"] = 0;
+}
 
 for (let i = 0; i < parseInt(window.localStorage.getItem("rects")); i++) {
     rects.push({
@@ -86,10 +83,6 @@ function draw() {
 
 function inputStart(e) {
 
-    // tell the browser we're handling this mouse event
-    e.preventDefault();
-    e.stopPropagation();
-
     let [x, y] = getInputPositionOnCanvas(e);
 
     isDragging = false;
@@ -105,6 +98,12 @@ function inputStart(e) {
     // save the current mouse position
     startX = x;
     startY = y;
+
+    if (isDragging) {
+        // tell the browser we're handling this mouse event
+        e.preventDefault();
+        e.stopPropagation();
+    }
 
 }
 
@@ -186,3 +185,40 @@ function getInputPositionOnCanvas(e) {
     return [mx, my];
 
 }
+
+//https://stackoverflow.com/a/17373688
+function randomColor(brightness) {
+    function randomChannel(brightness) {
+        var r = 255 - brightness;
+        var n = 0 | ((Math.random() * r) + brightness);
+        var s = n.toString(16);
+        return (s.length == 1) ? '0' + s : s;
+    }
+    return '#' + randomChannel(brightness) + randomChannel(brightness) + randomChannel(brightness);
+}
+
+$(document).ready(() => {
+
+    $('#dropdownZoom~ul>li>a').click((e) => {
+        window.localStorage.setItem('zoom', $(e.target).attr('data-value'));
+        location.reload();
+    });
+
+    $('#addToken').click((e) => {
+        rects.push({
+            x: (canvas.width - 30) / 2,
+            y: (canvas.height - 30) / 2,
+            width: 30 * globalZoom,
+            height: 30 * globalZoom,
+            fill: randomColor(50),
+            isDragging: false
+        });
+        window.localStorage[`rect${rects.length - 1}x`] = rects[rects.length - 1].x;
+        window.localStorage[`rect${rects.length - 1}y`] = rects[rects.length - 1].y;
+        window.localStorage[`rect${rects.length - 1}f`] = rects[rects.length - 1].fill;
+        window.localStorage["rects"] = rects.length;
+        draw();
+    });
+
+});
+
