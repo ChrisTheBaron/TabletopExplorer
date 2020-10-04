@@ -5,7 +5,17 @@ let image = document.getElementById('source');
 
 let imageZoom = 0.3; // how much to scale the image by to make it fit nicely
 
-let globalZoom = 2; // how much to scale *everything* by (excluding ui)
+let globalZoom = 1; // how much to scale *everything* by (excluding ui)
+if (window.localStorage.getItem("zoom") != null) {
+    globalZoom = parseFloat(window.localStorage.getItem("zoom"));
+}
+
+$(document).ready(() => {
+    $('#dropdownZoom~ul>li>a').click((e) => {
+        window.localStorage.setItem('zoom', $(e.target).attr('data-value'));
+        location.reload();
+    });
+});
 
 canvas.width = image.naturalWidth * imageZoom * globalZoom;
 canvas.height = image.naturalHeight * imageZoom * globalZoom;
