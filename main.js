@@ -1,189 +1,78 @@
-// get canvas related references
-let canvas = document.getElementById("canvas");
+paper.install(window);
 
-let image = document.getElementById('source');
+const tokenSize = 80;
 
-let imageZoom = 0.3; // how much to scale the image by to make it fit nicely
+$(window).ready(() => {
 
-let globalZoom = 1; // how much to scale *everything* by (excluding ui)
-if (window.localStorage.getItem("zoom") != null) {
-    globalZoom = parseFloat(window.localStorage.getItem("zoom"));
-}
+    let canvas = document.getElementById('canvas');
 
-canvas.width = image.naturalWidth * imageZoom * globalZoom;
-canvas.height = image.naturalHeight * imageZoom * globalZoom;
+    let image = document.getElementById('source');
 
-//canvas.width = $(window).width();
-//canvas.height = $(window).height();
+    let imageZoom = 1;// how much to scale the image by to make it fit nicely
 
-let ctx = canvas.getContext("2d");
-let BB = canvas.getBoundingClientRect();
-let offsetX = BB.left;
-let offsetY = BB.top;
+    let globalZoom = 1; // how much to scale *everything* by (excluding ui)
 
-let isDragging = false;
-let startX;
-let startY;
+    if (window.localStorage.getItem("zoom") != null) {
+        globalZoom = parseFloat(window.localStorage.getItem("zoom"));
+    }
 
-// an array of objects that define different rectangles
-let rects = [];
+    canvas.width = image.naturalWidth * imageZoom * globalZoom;
+    canvas.height = image.naturalHeight * imageZoom * globalZoom;
 
-if (window.localStorage["rects"] == null) {
-    window.localStorage["rects"] = 0;
-}
+    // Create an empty project and a view for the canvas:
+    paper.setup(canvas);
 
-for (let i = 0; i < parseInt(window.localStorage.getItem("rects")); i++) {
-    rects.push({
-        x: parseFloat(window.localStorage.getItem(`rect${i}x`)) * globalZoom,
-        y: parseFloat(window.localStorage.getItem(`rect${i}y`)) * globalZoom,
-        width: 30 * globalZoom,
-        height: 30 * globalZoom,
-        fill: window.localStorage.getItem(`rect${i}f`),
-        isDragging: false
+    var raster = new Raster('source');
+    raster.position = view.center;
+    raster.scale(imageZoom * globalZoom);
+
+    let rect = new Path.Rectangle(new Rectangle(10, 20, tokenSize * globalZoom, tokenSize * globalZoom));
+    rect.fillColor = '#e9e9ff';
+
+    initTools();
+
+    // Draw the view now:
+    view.draw();
+
+    $('#dropdownZoom~ul>li>a').click((e) => {
+        window.localStorage.setItem('zoom', $(e.target).attr('data-value'));
+        location.reload();
     });
-}
 
-canvas.onmousedown = inputStart;
-canvas.onmouseup = inputEnd;
-canvas.onmousemove = inputMove;
-canvas.onmouseleave = inputEnd;
+    $('#addToken').click((e) => {
+        let rect = new Path.Rectangle(new Rectangle(
+            (canvas.width - tokenSize) / 2,
+            (canvas.height - tokenSize) / 2,
+            tokenSize * globalZoom,
+            tokenSize * globalZoom
+        ));
+        rect.fillColor = randomColor(50);
+        view.draw();
+    });
 
-canvas.ontouchstart = inputStart;
-canvas.ontouchend = inputEnd;
-canvas.ontouchmove = inputMove;
+});
 
-// call to draw the scene
-draw();
+function initTools() {
+    let pan = new Tool();
 
-// draw a single rect
-function rect(x, y, w, h) {
-    ctx.beginPath();
-    ctx.rect(x, y, w, h);
-    ctx.closePath();
-    ctx.fill();
-}
-
-// redraw the scene
-function draw() {
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "pink";
-    rect(0, 0, canvas.width, canvas.height);
-
-    ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, canvas.width, canvas.height);
-
-    // redraw each rect in the rects[] array
-    for (let i = 0; i < rects.length; i++) {
-        let r = rects[i];
-        ctx.fillStyle = r.fill;
-        rect(r.x, r.y, r.width, r.height);
-    }
-
-}
-
-function inputStart(e) {
-
-    let [x, y] = getInputPositionOnCanvas(e);
-
-    isDragging = false;
-    for (let i = rects.length - 1; i >= 0; i--) {
-        let r = rects[i];
-        if (x > r.x && x < r.x + r.width && y > r.y && y < r.y + r.height) {
-            // if yes, set that rects isDragging=true
-            isDragging = true;
-            r.isDragging = true;
-            break;
+    var path;
+    pan.onMouseDown = function (event) {
+        path = null;
+        var hitResult = project.hitTest(event.point, {
+            fill: true,
+            tolerance: 5
+        });
+        if (hitResult && hitResult.type == "fill") {
+            path = hitResult.item;
         }
     }
-    // save the current mouse position
-    startX = x;
-    startY = y;
 
-    if (isDragging) {
-        // tell the browser we're handling this mouse event
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-}
-
-function inputEnd(e) {
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    // clear all the dragging flags
-    isDragging = false;
-    for (let i = 0; i < rects.length; i++) {
-        rects[i].isDragging = false;
-
-        // make sure nothing has slipped off the canvas
-        rects[i].x = Math.max(0, rects[i].x);
-        rects[i].x = Math.min(rects[i].x, canvas.width - rects[i].width);
-
-        rects[i].y = Math.max(0, rects[i].y);
-        rects[i].y = Math.min(rects[i].y, canvas.height - rects[i].height);
-
-        // save location to LS
-        window.localStorage.setItem(`rect${i}x`, rects[i].x / globalZoom);
-        window.localStorage.setItem(`rect${i}y`, rects[i].y / globalZoom);
-        window.localStorage.setItem(`rect${i}f`, rects[i].fill);
-    }
-
-    window.localStorage.setItem(`rects`, rects.length);
-
-    // redraw the scene with the new rect positions
-    draw();
-}
-
-function inputMove(e) {
-    if (isDragging) {
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        let [x, y] = getInputPositionOnCanvas(e);
-
-        // calculate the distance the mouse has moved
-        // since the last mousemove
-        let dx = x - startX;
-        let dy = y - startY;
-
-        // move each rect that isDragging
-        // by the distance the mouse has moved
-        // since the last mousemove
-        for (let i = 0; i < rects.length; i++) {
-            let r = rects[i];
-            if (r.isDragging) {
-                r.x += dx;
-                r.y += dy;
-            }
+    pan.onMouseDrag = function (event) {
+        if (path) {
+            // don't allow more than half off the screen
+            path.position = Point.min(Point.max(path.position.add(event.delta), new Point(0, 0)), new Point(canvas.width, canvas.height));
         }
-
-        // redraw the scene with the new rect positions
-        draw();
-
-        // reset the starting mouse position for the next mousemove
-        startX = x;
-        startY = y;
-
     }
-}
-
-function getInputPositionOnCanvas(e) {
-
-    let x = e.clientX ?? e.targetTouches[0].clientX;
-    let y = e.clientY ?? e.targetTouches[0].clientY;
-
-    let top = window.pageYOffset || document.documentElement.scrollTop;
-    let left = window.pageXOffset || document.documentElement.scrollLeft;
-
-    // get the current mouse position on the canvas
-    let mx = parseInt(x - offsetX + left);
-    let my = parseInt(y - offsetY + top);
-
-    return [mx, my];
-
 }
 
 //https://stackoverflow.com/a/17373688
@@ -196,29 +85,3 @@ function randomColor(brightness) {
     }
     return '#' + randomChannel(brightness) + randomChannel(brightness) + randomChannel(brightness);
 }
-
-$(document).ready(() => {
-
-    $('#dropdownZoom~ul>li>a').click((e) => {
-        window.localStorage.setItem('zoom', $(e.target).attr('data-value'));
-        location.reload();
-    });
-
-    $('#addToken').click((e) => {
-        rects.push({
-            x: (canvas.width - 30) / 2,
-            y: (canvas.height - 30) / 2,
-            width: 30 * globalZoom,
-            height: 30 * globalZoom,
-            fill: randomColor(50),
-            isDragging: false
-        });
-        window.localStorage[`rect${rects.length - 1}x`] = rects[rects.length - 1].x;
-        window.localStorage[`rect${rects.length - 1}y`] = rects[rects.length - 1].y;
-        window.localStorage[`rect${rects.length - 1}f`] = rects[rects.length - 1].fill;
-        window.localStorage["rects"] = rects.length;
-        draw();
-    });
-
-});
-
