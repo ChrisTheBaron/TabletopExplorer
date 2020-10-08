@@ -37,6 +37,15 @@
         }
     </style>
 
+    <script src="/lib/modernizr.js"></script>
+    <script>
+        for (let i of Object.keys(Modernizr)) {
+            if (Modernizr[i] === false) {
+                location.replace("https://browsehappy.com/");
+            }
+        }
+    </script>
+
 </head>
 <body>
 
