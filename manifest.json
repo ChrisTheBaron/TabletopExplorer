@@ -1,0 +1,7 @@
+{
+  "name": "Tabletop Explorer",
+  "short_name": "Tabletop Explorer",
+  "lang": "en-GB",
+  "start_url": "https://tabletop-explorer.christhebaron.co.uk",
+  "display": "standalone"
+}

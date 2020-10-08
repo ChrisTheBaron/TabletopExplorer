@@ -30,7 +30,10 @@ $(window).ready(async () => {
 
     canvas.width = image.naturalWidth * scene.background_zoom * globalZoom;
     canvas.height = image.naturalHeight * scene.background_zoom * globalZoom;
-
+    
+    canvas.style.width = canvas.width + "px";
+    canvas.style.height = canvas.height + "px";
+    
     // Create an empty project and a view for the canvas:
     paper.setup(canvas);
 
@@ -64,6 +67,8 @@ $(window).ready(async () => {
         if (path) {
             // don't allow more than half off the screen
             path.position = Point.min(Point.max(path.position.add(event.delta), new Point(0, 0)), new Point(canvas.width, canvas.height));
+        } else {
+            return true;
         }
     }
 
