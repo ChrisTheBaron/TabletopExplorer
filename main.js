@@ -1,17 +1,11 @@
-paper.install(window);
-
 const tokenSize = 80;
 const defaultSceneName = 'default';
-const imageTagID = 'source';
-const canvasTagID = 'canvas';
+const mainTagID = 'main';
+const dbName = 'tabletop.explorer';
 
 $(window).ready(async () => {
 
-    let db = new PouchDB('tabletop.explorer');
-
-    await initDb(db);
-
-    let canvas = document.getElementById(canvasTagID);
+    let db = await initDb();
 
     let sceneName = defaultSceneName;
     if (window.localStorage.getItem("scene") != null) {
@@ -20,105 +14,101 @@ $(window).ready(async () => {
 
     let scene = await db.get(sceneName);
     let imageAtt = await db.getAttachment(sceneName, 'image');
-    let image = await addSourceImage(URL.createObjectURL(imageAtt));
+    let imageUrl = URL.createObjectURL(imageAtt);
+    let imageDim = await getImageDimensions(imageUrl);
 
-    let globalZoom = 1; // how much to scale *everything* by (excluding ui)
+    let main = document.getElementById(mainTagID);
 
-    if (window.localStorage.getItem("zoom") != null) {
-        globalZoom = parseFloat(window.localStorage.getItem("zoom"));
-    }
+    main.style.backgroundImage = `url('${imageUrl}')`;
+    main.style.height = `${imageDim.height}px`;
+    main.style.width = `${imageDim.width}px`;
 
-    canvas.width = image.naturalWidth * scene.background_zoom * globalZoom;
-    canvas.height = image.naturalHeight * scene.background_zoom * globalZoom;
-    
-    canvas.style.width = canvas.width + "px";
-    canvas.style.height = canvas.height + "px";
-    
-    // Create an empty project and a view for the canvas:
-    paper.setup(canvas);
+    //let globalZoom = 1; // how much to scale *everything* by (excluding ui)
 
-    var raster = new Raster(imageTagID);
-    raster.position = view.center;
-    raster.scale(scene.background_zoom * globalZoom);
+    //if (window.localStorage.getItem("zoom") != null) {
+    //    globalZoom = parseFloat(window.localStorage.getItem("zoom"));
+    //}
 
-    let tokenGroup = new Group();
+    //main.style.transform = `scale(${globalZoom})`;
 
     for (let token of scene.tokens) {
-        let rect = new Path.Rectangle(new Rectangle(token.x, token.y, tokenSize * globalZoom, tokenSize * globalZoom));
-        rect.fillColor = token.f;
-        tokenGroup.addChild(rect);
+        $(main).append(`<div class="draggable" data-x="${token.x}" data-y="${token.y}" style="
+            background-color: ${token.f};
+            transform: translate(${token.x}px, ${token.y}px);"></div>`);
     }
 
-    let pan = new Tool();
+    //$('#dropdownZoom~ul>li>a').click((e) => {
+    //    window.localStorage.setItem('zoom', $(e.target).attr('data-value'));
+    //    location.reload();
+    //});
 
-    var path;
-    pan.onMouseDown = function (event) {
-        path = null;
-        var hitResult = project.hitTest(event.point, {
-            fill: true,
-            tolerance: 5
+    // target elements with the "draggable" class
+    interact('.draggable')
+        .draggable({
+
+            // keep the element within the area of it's parent
+            modifiers: [
+                interact.modifiers.restrictRect({
+                    restriction: 'parent',
+                    endOnly: false
+                })
+            ],
+
+            // enable autoScroll
+            autoScroll: true,
+
+            listeners: {
+
+                start(event) {
+                    $(event.target).addClass("dragging");
+                },
+
+                end(event) {
+                    $(event.target).removeClass("dragging");
+                },
+
+                // call this function on every dragmove event
+                move(event) {
+                    var target = event.target
+                    // keep the dragged position in the data-x/data-y attributes
+                    var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
+                    var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
+
+                    // translate the element
+                    target.style.transform =
+                        'translate(' + x + 'px, ' + y + 'px)'
+
+                    // update the position attributes
+                    target.setAttribute('data-x', x)
+                    target.setAttribute('data-y', y)
+                }
+
+            }
+
         });
-        if (hitResult && hitResult.type == "fill") {
-            path = hitResult.item;
-        }
-    }
 
-    pan.onMouseDrag = function (event) {
-        if (path) {
-            // don't allow more than half off the screen
-            path.position = Point.min(Point.max(path.position.add(event.delta), new Point(0, 0)), new Point(canvas.width, canvas.height));
-        } else {
-            return true;
-        }
-    }
-
-    let deleteToken = new Tool();
-
-    deleteToken.onMouseDown = function (event) {
-        var hitResult = project.hitTest(event.point, {
-            fill: true,
-            tolerance: 5
-        });
-        if (hitResult && hitResult.type == "fill") {
-            hitResult.item.remove();
-            pan.activate();
-        }
-    }
-
-    // Draw the view now:
-    view.draw();
-
-    $('#dropdownZoom~ul>li>a').click((e) => {
-        window.localStorage.setItem('zoom', $(e.target).attr('data-value'));
-        location.reload();
-    });
-
-    $('#removeToken').click((e) => {
-        console.log("delete tool active");
-        deleteToken.activate();
+    $('main').on('click', '.draggable', (e) => {
+        if ($('#removeTokens').prop('checked')) {
+            $(e.target).remove(); // todo: check works with children
+        };
     });
 
     $('#addToken').click((e) => {
-        let rect = new Path.Rectangle(new Rectangle(
-            (canvas.width - tokenSize) / 2,
-            (canvas.height - tokenSize) / 2,
-            tokenSize * globalZoom,
-            tokenSize * globalZoom
-        ));
-        rect.fillColor = randomColor(50);
-        tokenGroup.addChild(rect);
-        view.draw();
+        $(main).append(`<div class="draggable" data-x="10" data-y="10" style="
+            background-color: ${randomColor(50)};
+            transform: translate(10px, 10px);"></div>`);
     });
 
     setInterval(async () => {
 
         // update the DB
         scene.tokens = [];
-        for (let rect of tokenGroup.children) {
+
+        for (let rect of $(main).find('.draggable')) {
             scene.tokens.push({
-                x: rect.position.x,
-                y: rect.position.y,
-                f: rect.fillColor._canvasStyle
+                x: $(rect).attr('data-x'),
+                y: $(rect).attr('data-y'),
+                f: rect.style.backgroundColor
             });
         }
 
@@ -134,22 +124,22 @@ $(window).ready(async () => {
 
 });
 
-function addSourceImage(src) {
-    return new Promise((resolve, reject) => {
-        let old = document.getElementById(imageTagID);
-        if (old) {
-            old.outerHTML = "";
+function getImageDimensions(file) {
+    return new Promise(function (resolved, rejected) {
+        var i = new Image()
+        i.onload = function () {
+            resolved({ width: i.width, height: i.height })
+        };
+        i.onerror = function (e) {
+            rejected(e);
         }
-        var image = document.createElement('img');
-        image.src = src;
-        image.id = imageTagID;
-        image.onload = () => resolve(image);
-        image.onerror = reject;
-        document.body.appendChild(image);
+        i.src = file
     })
 }
 
-async function initDb(db) {
+async function initDb() {
+
+    let db = new PouchDB(dbName);
 
     let entries = await db.allDocs();
 
@@ -173,6 +163,8 @@ async function initDb(db) {
             }
         });
     }
+
+    return db;
 
 }
 

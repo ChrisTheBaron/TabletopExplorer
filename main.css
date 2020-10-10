@@ -1,0 +1,46 @@
+
+body {
+    overflow: auto;
+    text-align: center;
+    background-color: black;
+    overscroll-behavior: contain;
+    touch-action: manipulation;
+}
+
+main {
+    margin: auto;
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin-bottom: 56px;
+}
+
+nav {
+    position: static;
+}
+
+.draggable {
+    width: 80px;
+    height: 80px;
+    color: white;
+    border-radius: 50%;
+    touch-action: none;
+    user-select: none;
+    position: absolute;
+}
+
+.dragging {
+    box-shadow: rgba(0, 0, 0, 0.75) 0px 0px 20px 0px;
+}
+
+#removeTokens:checked {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+#removeTokens ~ label {
+    color: white;
+}
+
+#removeTokens:checked ~ label {
+    color: #dc3545;
+}
