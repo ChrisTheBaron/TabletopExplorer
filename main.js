@@ -32,7 +32,7 @@ $(window).ready(async () => {
     //main.style.transform = `scale(${globalZoom})`;
 
     for (let token of scene.tokens) {
-        $(main).append(`<div class="draggable" data-x="${token.x}" data-y="${token.y}" style="
+        $(main).append(`<div class="draggable" data-label="${token.l}" data-x="${token.x}" data-y="${token.y}" style="
             background-color: ${token.f};
             transform: translate(${token.x}px, ${token.y}px);"></div>`);
     }
@@ -93,10 +93,31 @@ $(window).ready(async () => {
         };
     });
 
-    $('#addToken').click((e) => {
-        $(main).append(`<div class="draggable" data-x="10" data-y="10" style="
-            background-color: ${randomColor(50)};
-            transform: translate(10px, 10px);"></div>`);
+    let addTokenModal = document.getElementById('addTokenModal');
+
+    addTokenModal.addEventListener('show.bs.modal', () => {
+        $('#addTokenModal form')[0].reset();
+        $('#addTokenModal form #tokenColourInput').val(randomColor(50));
+    })
+
+    $('#addToken').click(async (e) => {
+        let label = $('#addTokenModal form #tokenLabelInput').val();
+        let colour = $('#addTokenModal form #tokenColourInput').val();
+        let number = parseInt($('#addTokenModal form #tokenNumberInput').val());
+        if (label.trim() == '' || number < 1) {
+            return false;
+        }
+        for (let i = 1; i <= number; i++) {
+            let labelN = label;
+            if (number > 1) {
+                labelN = `${label} ${i}`;
+            }
+            $(main).append(`<div class="draggable" data-x="100" data-y="100" data-label="${labelN}" style="
+                background-color: ${colour};
+                transform: translate(100px, 100px);"></div>`);
+        }
+        let modal = bootstrap.Modal.getInstance(addTokenModal);
+        await modal.hide();
     });
 
     setInterval(async () => {
@@ -104,11 +125,13 @@ $(window).ready(async () => {
         // update the DB
         scene.tokens = [];
 
-        for (let rect of $(main).find('.draggable')) {
+        for (let r of $(main).find('.draggable')) {
+            let rect = $(r);
             scene.tokens.push({
-                x: $(rect).attr('data-x'),
-                y: $(rect).attr('data-y'),
-                f: rect.style.backgroundColor
+                x: rect.attr('data-x'),
+                y: rect.attr('data-y'),
+                f: r.style.backgroundColor,
+                l: rect.attr('data-label')
             });
         }
 
