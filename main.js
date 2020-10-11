@@ -15,7 +15,7 @@ $(window).ready(async () => {
 
     let sceneName = defaultSceneName;
     if (window.localStorage.getItem(lsSceneName) != null) {
-        sceneName = parseFloat(window.localStorage.getItem(lsSceneName));
+        sceneName = window.localStorage.getItem(lsSceneName);
     }
 
     let tokenImageDoc = await db.get(tokenImageDocumentName);
@@ -71,6 +71,17 @@ $(window).ready(async () => {
     //    window.localStorage.setItem('zoom', $(e.target).attr('data-value'));
     //    location.reload();
     //});
+
+    let scenes = await db.allDocs({ include_docs: true });
+    for (let s of scenes.rows) {
+        if (s.id == mapImageDocumentName ||
+            s.id == tokenImageDocumentName ||
+            s.id == sceneName) {
+            continue;
+        }
+        $('#sceneSelectInput').append(`<option id="${s.id}">${s.doc.name}</option>`);
+        $('#removeSceneInput').append(`<option id="${s.id}">${s.doc.name}</option>`);
+    }
 
     // target elements with the "draggable" class
     interact('.draggable')
@@ -235,6 +246,99 @@ $(window).ready(async () => {
             await db.put(scene);
             scene = await db.get(scene._id);
             await saveChangesToDB();
+            location.reload();
+        } catch (e) {
+            alert(e.message);
+        }
+    });
+
+    let changeSceneModal = document.getElementById('changeSceneModal');
+
+    changeSceneModal.addEventListener('show.bs.modal', () => {
+        $('#changeSceneModal form')[0].reset();
+        $('label[for="newImageFile"]>.form-file-text').text('Choose file...');
+    })
+
+    $('#changeSceneModal form #newImageFile').change((e) => {
+        let file = $('#changeSceneModal form #newImageFile').val();
+        if (file.includes('\\')) {
+            $('label[for="newImageFile"]>.form-file-text').text(file.split('\\').pop());
+        } else {
+            $('label[for="newImageFile"]>.form-file-text').text('Choose file...');
+        }
+    });
+
+    $('#newScene').click(async (e) => {
+        try {
+            let name = $('#changeSceneModal form #newSceneNameInput').val();
+            let file = $('#changeSceneModal form #newImageFile').val();
+            if (file.trim() == '' || name.trim() == '') {
+                return false;
+            }
+            let image = await getUploadedFileContents($('#changeSceneModal form #newImageFile'));
+            if (!isFileImage(image)) {
+                alert("Filetype not supported.");
+                return false;
+            }
+
+            let sceneId = `scene-` + name.replace(/[^[:alnum:]]/g, `-`).toLowerCase();
+            if (scenes.rows.some(s => s.id == sceneId)) {
+                alert(`'${name}' already exists`);
+                return false;
+            }
+
+            let imageName = uuidv4();
+            let imageType = image.split(';')[0].split(':')[1];
+            let imageData = image.split(';')[1].split(',')[1];
+            mapImageDocument = await db.get(mapImageDocumentName);
+            await db.putAttachment(mapImageDocumentName, imageName, mapImageDocument._rev, imageData, imageType);
+            mapImageDocument = await db.get(mapImageDocumentName);
+            scene = await db.get(scene._id);
+            await saveChangesToDB();
+            let newScene = {
+                _id: sceneId,
+                name: name,
+                background_zoom: 1,
+                background: imageName,
+                tokens: []
+            };
+            await db.put(newScene);
+            window.localStorage.setItem(lsSceneName, sceneId);
+            location.reload();
+        } catch (e) {
+            alert(e.message);
+        }
+    });
+
+    $('#changeScene').click(async (e) => {
+        try {
+            let id = $('#changeSceneModal form #sceneSelectInput>:selected').attr('id');
+            if (id == null || id.trim().length == 0) {
+                return;
+            }
+            await saveChangesToDB();
+            window.localStorage.setItem(lsSceneName, id);
+            location.reload();
+        } catch (e) {
+            alert(e.message);
+        }
+    });
+
+    $('#removeScene').click(async (e) => {
+        try {
+            let id = $('#changeSceneModal form #removeSceneInput>:selected').attr('id');
+            if (id == null || id.trim().length == 0) {
+                return;
+            }
+            let sceneToRemove = scenes.rows.find(s => s.id == id);
+            if (sceneToRemove == null) {
+                return;
+            }
+            if (!confirm(`Are you sure you want to remove '${sceneToRemove.doc.name}'?`)) {
+                return;
+            }
+            await saveChangesToDB();
+            await db.remove(id, sceneToRemove.doc._rev);
             location.reload();
         } catch (e) {
             alert(e.message);
