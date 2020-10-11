@@ -93,8 +93,9 @@ $(window).ready(async () => {
                     $(event.target).addClass("dragging");
                 },
 
-                end(event) {
+                end: async function (event) {
                     $(event.target).removeClass("dragging");
+                    await saveChangesToDB();
                 },
 
                 // call this function on every dragmove event
@@ -117,9 +118,10 @@ $(window).ready(async () => {
 
         });
 
-    $('main').on('click', '.draggable', (e) => {
+    $('main').on('click', '.draggable', async (e) => {
         if ($('#removeTokens').prop('checked')) {
             $(e.target).remove(); // todo: check works with children
+            await saveChangesToDB();
         };
     });
 
@@ -182,6 +184,7 @@ $(window).ready(async () => {
         }
         let modal = bootstrap.Modal.getInstance(addTokenModal);
         await modal.hide();
+        await saveChangesToDB();
     });
 
     $('#addTokenModal form #tokenImageFile').change((e) => {
@@ -230,6 +233,8 @@ $(window).ready(async () => {
             scene.background_zoom = 1;
             scene.background = imageName;
             await db.put(scene);
+            scene = await db.get(scene._id);
+            await saveChangesToDB();
             location.reload();
         } catch (e) {
             alert(e.message);
@@ -249,6 +254,8 @@ $(window).ready(async () => {
                 scene = await db.get(scene._id);
                 scene.background_zoom = new_zoom * scene.background_zoom;
                 await db.put(scene);
+                scene = await db.get(scene._id);
+                await saveChangesToDB();
                 location.reload();
             } catch (e) {
                 alert(e.message);
@@ -346,11 +353,8 @@ $(window).ready(async () => {
         }
     });
 
-    setInterval(async () => {
-
-        // update the DB
+    async function saveChangesToDB() {
         scene.tokens = [];
-
         for (let r of $(main).find('.draggable')) {
             let rect = $(r);
             scene.tokens.push({
@@ -362,16 +366,10 @@ $(window).ready(async () => {
                 b: rect.attr('data-b')
             });
         }
-
         await db.put(scene);
         scene = await db.get(scene._id);
-
-    }, 1000);
-
-    // keeps the db size down
-    setInterval(async () => {
-        await db.compact();
-    }, 1000 * 60 * 5);
+        console.log("DB updated", scene._rev);
+    }
 
 });
 
@@ -441,8 +439,8 @@ async function initDb() {
             background: defaultSceneMapName,
             tokens: [
                 {
-                    x: 10,
-                    y: 20,
+                    x: 50,
+                    y: 50,
                     f: '#e9e9ff',
                     l: "Goblin",
                     s: gridSize * tokenBufferZoom,
