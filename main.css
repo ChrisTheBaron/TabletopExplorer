@@ -19,8 +19,6 @@ nav {
 }
 
 .draggable {
-    width: 80px;
-    height: 80px;
     color: white;
     border-radius: 50%;
     touch-action: none;
@@ -99,3 +97,12 @@ nav {
     .tt-suggestion p {
         margin: 0;
     }
+
+
+.resize-drag {
+    border-radius: 8px;
+    background-color: rgb(34 153 238 / 50%);
+    touch-action: none;
+    /* This makes things *much* easier */
+    box-sizing: border-box;
+}
