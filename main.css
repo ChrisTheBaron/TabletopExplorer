@@ -20,10 +20,13 @@ nav {
 
 .draggable {
     color: white;
-    border-radius: 50%;
     touch-action: none;
     user-select: none;
     position: absolute;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: top;
 }
 
     .draggable::after {
@@ -37,9 +40,13 @@ nav {
         left: -50%;
     }
 
-.dragging {
-    box-shadow: rgba(0, 0, 0, 0.75) 0px 0px 20px 0px;
-}
+    .draggable.no-image {
+        border-radius: 50%;
+    }
+
+        .draggable.no-image.dragging {
+            box-shadow: rgba(0, 0, 0, 0.75) 0px 0px 20px 0px;
+        }
 
 #removeTokens:checked {
     background-color: #dc3545;
