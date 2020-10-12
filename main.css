@@ -11,7 +11,7 @@ main {
     margin: auto;
     background-size: contain;
     background-repeat: no-repeat;
-    margin-bottom: 56px;
+    margin-bottom: 56px;/*nav*/
 }
 
 nav {
@@ -22,18 +22,22 @@ nav {
     color: white;
     touch-action: none;
     user-select: none;
-    position: absolute;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position-x: center;
-    background-position-y: top;
+    position: relative;
 }
 
-    .draggable::after {
+    .draggable .image {
+        width: 100%;
+        height: 100%;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position-x: center;
+        background-position-y: top;
+    }
+
+    .draggable::before {
         display: block;
-        content: attr(data-label);
+        content: attr(data-l);
         position: relative;
-        bottom: 25px;
         text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
         text-align: center;
         width: 200%;
@@ -44,9 +48,29 @@ nav {
         border-radius: 50%;
     }
 
+        .draggable.no-image::before {
+            bottom: 25px;
+        }
+
         .draggable.no-image.dragging {
             box-shadow: rgba(0, 0, 0, 0.75) 0px 0px 20px 0px;
         }
+
+    .draggable[data-r="0"] .image {
+        transform: rotate(0deg);
+    }
+
+    .draggable[data-r="1"] .image {
+        transform: rotate(90deg);
+    }
+
+    .draggable[data-r="2"] .image {
+        transform: rotate(180deg);
+    }
+
+    .draggable[data-r="3"] .image {
+        transform: rotate(270deg);
+    }
 
 #removeTokens:checked {
     background-color: #dc3545;

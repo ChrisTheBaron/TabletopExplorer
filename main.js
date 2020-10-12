@@ -52,18 +52,7 @@ $(window).ready(async () => {
             tokenUrl = URL.createObjectURL(tokenAtt);
         }
 
-        $(main).append(`<div class="draggable ${(tokenUrl.length > 0 ? "" : "no-image")}" 
-            data-label="${token.l}" 
-            data-x="${token.x}"    
-            data-y="${token.y}" 
-            data-s="${token.s}" 
-            data-b="${token.b}"
-            style="
-                background-color: ${token.f};
-                width: ${token.s}px;
-                height: ${token.s}px;
-                background-image: url('${tokenUrl}');
-                transform: translate(${token.x}px, ${token.y}px);"></div>`);
+        $(main).append(getTokenMarkup(token, tokenUrl));
 
     }
 
@@ -127,11 +116,19 @@ $(window).ready(async () => {
 
             }
 
+        }).on('doubletap', async function (event) {
+            event.preventDefault()
+            $(event.currentTarget).attr('data-r', (parseInt($(event.currentTarget).attr('data-r')) + 1) % 4);
+            await saveChangesToDB();
         });
 
     $('main').on('click', '.draggable', async (e) => {
         if ($('#removeTokens').prop('checked')) {
-            $(e.target).remove(); // todo: check works with children
+            if ($(e.target).is('.draggable')) {
+                $(e.target).remove();
+            } else {
+                $(e.target).parent('.draggable').remove();
+            }
             await saveChangesToDB();
         };
     });
@@ -180,18 +177,19 @@ $(window).ready(async () => {
             if (number > 1) {
                 labelN = `${label} ${i}`;
             }
-            $(main).append(`<div class="draggable ${(imageAttachmentName.length > 0 ? "" : "no-image")}" 
-                data-x="0"
-                data-y="0"
-                data-s="${size}" 
-                data-label="${labelN}" 
-                data-b="${imageAttachmentName}"
-                style="
-                    background-color: ${colour};
-                    width: ${size}px;
-                    height: ${size}px;
-                    background-image: url('${image}');
-                    transform: translate(0px, 0px);"></div>`);
+
+            let token = {
+                s: size,
+                x: 10,
+                y: 10,
+                b: imageAttachmentName,
+                f: colour,
+                l: labelN,
+                r: 0
+            };
+
+            $(main).append(getTokenMarkup(token, image));
+
         }
         let modal = bootstrap.Modal.getInstance(addTokenModal);
         await modal.hide();
@@ -380,11 +378,18 @@ $(window).ready(async () => {
             $('.draggable').addClass('d-none');
 
             // show the reference square
-            $('main').append(`<div class="resize-drag" data-x="10" data-y="10" data-s="${size}" style="
-                transform: translate(10px, 10px);
-                width: ${gridSize}px;
-                height: ${gridSize}px;
-            "></div>`);
+            $('main').append(`<div class="resize-drag" 
+                data-x="10"
+                data-y="10"
+                data-s="${size}" 
+                data-w="${gridSize * size}"
+                data-h="${gridSize * size}"
+                style="
+                    transform: translate(10px, 10px);
+                    width: ${gridSize * size}px;
+                    height: ${gridSize * size}px;
+                ">
+            </div>`);
 
             interact('.resize-drag')
                 .resizable({
@@ -466,8 +471,9 @@ $(window).ready(async () => {
                 y: rect.attr('data-y'),
                 s: rect.attr('data-s'),
                 f: r.style.backgroundColor,
-                l: rect.attr('data-label'),
-                b: rect.attr('data-b')
+                l: rect.attr('data-l'),
+                b: rect.attr('data-b'),
+                r: rect.attr('data-r')
             });
         }
         await db.put(scene);
@@ -509,6 +515,23 @@ function getImageDisplayDimensions(file, zoom) {
         i.src = file;
     })
 }
+function getTokenMarkup(token, imageUrl) {
+    return `<div class="draggable ${(imageUrl.length > 0 ? "" : "no-image")}" 
+            data-l="${token.l}" 
+            data-x="${token.x || 10}"    
+            data-y="${token.y || 10}" 
+            data-s="${token.s || 1}" 
+            data-b="${token.b || ''}"
+            data-r="${token.r || 0}"
+            style="
+                transform: translate(${token.x}px, ${token.y}px);
+                background-color: ${token.f || '#00000000'};
+                width: ${token.s || 1}px;
+                height: ${token.s || 1}px;
+            ">
+            ${(imageUrl.length > 0 ? `<div class="image" style="background-image: url('${imageUrl}');"></div>` : "")}
+        </div>`;
+}
 
 async function initDb() {
 
@@ -548,7 +571,8 @@ async function initDb() {
                     f: '#e9e9ff',
                     l: "Goblin",
                     s: gridSize * tokenBufferZoom,
-                    b: ""
+                    b: "",
+                    r: 0
                 }
             ]
         };
