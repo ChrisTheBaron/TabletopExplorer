@@ -470,6 +470,15 @@ $(window).ready(async () => {
         }
     });
 
+    $('#clearAllData').click(async () => {
+        if (confirm("Are you sure?")) {
+            await db.destroy();
+            localStorage.clear();
+            alert("The page will now reload.");
+            window.location.reload(true);
+        }
+    });
+
     async function saveChangesToDB() {
         scene.tokens = [];
         for (let r of $(main).find('.draggable')) {
