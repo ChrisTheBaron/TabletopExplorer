@@ -1,7 +1,6 @@
 
 body {
     overflow: auto;
-    text-align: center;
     background-color: black;
     overscroll-behavior: contain;
     touch-action: manipulation;
@@ -11,7 +10,7 @@ main {
     margin: auto;
     background-size: contain;
     background-repeat: no-repeat;
-    margin-bottom: 56px;/*nav*/
+    margin-bottom: 54px;/*nav*/
 }
 
 nav {
@@ -136,4 +135,7 @@ nav {
     touch-action: none;
     /* This makes things *much* easier */
     box-sizing: border-box;
+    color: white;
+    padding: 10px;
+    overflow: hidden;
 }
