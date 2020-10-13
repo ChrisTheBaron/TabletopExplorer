@@ -174,6 +174,7 @@ $(window).ready(async () => {
         let label = $('#addTokenModal form #tokenLabelInput').val();
         let colour = $('#addTokenModal form #tokenColourInput').val();
         let number = parseInt($('#addTokenModal form #tokenNumberInput').val());
+        let numbering = $('#tokenNumberingInput option:selected').val();
         let size = parseInt($('#addTokenModal form #tokenSizeInput').val()) * gridSize * tokenBufferZoom;
 
         if (label.trim() == '' || number < 1 || size < 1) {
@@ -203,7 +204,7 @@ $(window).ready(async () => {
         for (let i = 1; i <= number; i++) {
             let labelN = label;
             if (number > 1) {
-                labelN = `${label} ${i}`;
+                labelN = `${label} ${numberToLabel(i, numbering)}`;
             }
 
             let token = {
@@ -657,4 +658,46 @@ function randomColor(brightness) {
         return (s.length == 1) ? '0' + s : s;
     }
     return '#' + randomChannel(brightness) + randomChannel(brightness) + randomChannel(brightness);
+}
+
+function numberToLabel(i, numbering) {
+    switch (numbering) {
+        case "alphabetic":
+            return toColumnName(i);
+        case "numeric":
+            return i;
+        case "roman":
+            return arabicToRoman(i);
+    }
+}
+
+//https://blog.usejournal.com/create-a-roman-numerals-converter-in-javascript-a82fda6b7a60
+function arabicToRoman(number) {
+    let roman = "";
+    const romanNumList = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XV: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
+    let a;
+    if (number < 1 || number > 3999) {
+        console.log("number out of bounds", number);
+        return number;
+    } else {
+        for (let key in romanNumList) {
+            a = Math.floor(number / romanNumList[key]);
+            if (a >= 0) {
+                for (let i = 0; i < a; i++) {
+                    roman += key;
+                }
+            }
+            number = number % romanNumList[key];
+        }
+    }
+    return roman;
+}
+
+//https://cwestblog.com/2013/09/05/javascript-snippet-convert-number-to-column-name/
+function toColumnName(num) {
+    let ret = '';
+    for (let a = 1, b = 26; (num -= a) >= 0; a = b, b *= 26) {
+        ret = String.fromCharCode(parseInt((num % b) / a) + 65) + ret;
+    }
+    return ret;
 }
