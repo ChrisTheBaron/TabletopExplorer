@@ -27,7 +27,6 @@ $(window).ready(async () => {
         window.localStorage.setItem(lsZoom, zoom);
     });
 
-
     if (window.localStorage.getItem(lsShownHelp) != lsShownHelp) {
         let el = document.getElementById('helpModal');
         let helpModal = new bootstrap.Modal(el);
@@ -42,7 +41,7 @@ $(window).ready(async () => {
         sceneName = window.localStorage.getItem(lsSceneName);
     }
 
-    let tokenImageDoc = await db.get(tokenImageDocumentName);
+    let tokenImageDoc = await db.get(tokenImageDocumentName, { attachments: true });
 
     let scene = await db.get(sceneName);
     let imageAtt = await db.getAttachment(mapImageDocumentName, scene.background);
@@ -55,6 +54,33 @@ $(window).ready(async () => {
     main.style.height = `${imageDim.height}em`;
     main.style.width = `${imageDim.width}em`;
 
+    //------------------------------------------------------------------------
+
+    IconSelect.COMPONENT_ICON_FILE_PATH = './lib/iconselect.js-1.0/images/control/icon-select/arrow.png';
+
+    let iconSelect = new IconSelect("my-icon-select",
+        {
+            'selectedIconWidth': 48,
+            'selectedIconHeight': 48,
+            'selectedBoxPadding': 1,
+            'iconsWidth': 48,
+            'iconsHeight': 48,
+            'boxIconSpace': 1,
+            'vectoralIconNumber': 2,
+            'horizontalIconNumber': 6
+        });
+
+    var icons = [];
+
+    icons.push({ 'iconFilePath': 'lib/fontawesome-free-5.15.1-web/svgs/solid/ban.svg', 'iconValue': '' });
+    for (let token in tokenImageDoc._attachments) {
+        let imageUrl = `data:${tokenImageDoc._attachments[token].content_type};base64,${tokenImageDoc._attachments[token].data}`;
+        icons.push({ 'iconFilePath': imageUrl, 'iconValue': token });
+    }
+
+    iconSelect.refresh(icons);
+
+    //------------------------------------------------------------------------
 
     for (let token of scene.tokens) {
         // check for ones that are out of bounds, 
@@ -72,7 +98,6 @@ $(window).ready(async () => {
         $(main).append(getTokenMarkup(token, tokenUrl));
 
     }
-
 
     let scenes = await db.allDocs({ include_docs: true });
     let availableScenes = [];
@@ -183,6 +208,7 @@ $(window).ready(async () => {
         $('#addTokenModal form')[0].reset();
         $('#addTokenModal form #tokenColourInput').val(randomColor(50));
         $('label[for="tokenImageFile"]>.form-file-text').text('Choose file...');
+        $('#my-icon-select .icon img[icon-value=""]').parent('.icon').click();
     })
 
     $('#addToken').click(async (e) => {
@@ -200,7 +226,11 @@ $(window).ready(async () => {
         let imageAttachmentName = "";
         let image = "";
 
-        if ($('#addTokenModal form #tokenImageFile').val().trim().length > 0) {
+        if ($('#my-icon-select .icon.selected img').attr('icon-value').length > 0) {
+            colour = "#00000000";
+            imageAttachmentName = $('#my-icon-select .icon.selected img').attr('icon-value');
+            image = $('#my-icon-select .icon.selected img')[0].src;
+        } else if ($('#addTokenModal form #tokenImageFile').val().trim().length > 0) {
             image = await getUploadedFileContents($('#addTokenModal form #tokenImageFile'));
             if (!isFileImage(image)) {
                 alert("Filetype not supported.");

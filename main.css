@@ -150,3 +150,13 @@ nav {
     left: 5px;
     text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
+
+.icon-select {
+    z-index: 5;
+}
+
+    .icon-select .box {
+        z-index: 5;
+        overflow-y: scroll !important;
+        width: 126px !important;
+    }
