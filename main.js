@@ -39,13 +39,6 @@ $(window).ready(async () => {
     main.style.height = `${imageDim.height}px`;
     main.style.width = `${imageDim.width}px`;
 
-    //let globalZoom = 1; // how much to scale *everything* by (excluding ui)
-
-    //if (window.localStorage.getItem("zoom") != null) {
-    //    globalZoom = parseFloat(window.localStorage.getItem("zoom"));
-    //}
-
-    //main.style.transform = `scale(${globalZoom})`;
 
     for (let token of scene.tokens) {
         // check for ones that are out of bounds, 
@@ -64,20 +57,33 @@ $(window).ready(async () => {
 
     }
 
-    //$('#dropdownZoom~ul>li>a').click((e) => {
-    //    window.localStorage.setItem('zoom', $(e.target).attr('data-value'));
-    //    location.reload();
-    //});
 
     let scenes = await db.allDocs({ include_docs: true });
+    let availableScenes = [];
     for (let s of scenes.rows) {
         if (s.id == mapImageDocumentName ||
             s.id == tokenImageDocumentName ||
             s.id == sceneName) {
             continue;
         }
-        $('#sceneSelectInput').append(`<option id="${s.id}">${s.doc.name}</option>`);
-        $('#removeSceneInput').append(`<option id="${s.id}">${s.doc.name}</option>`);
+        availableScenes.push(s);
+    }
+
+    let scenesGrouped = groupBy(availableScenes, (s) => {
+        return s.doc.name.includes('/') ? s.doc.name.split('/')[0].trim() : "Uncategorised";
+    })
+
+    for (let group in scenesGrouped) {
+        let options = "";
+        for (let option of scenesGrouped[group]) {
+            if (option.doc.name.includes('/')) {
+                options += `<option id="${option.id}">${option.doc.name.substring(option.doc.name.indexOf('/') + 1).trim()}</option>`;
+            } else {
+                options += `<option id="${option.id}">${option.doc.name}</option>`;
+            }
+        }
+        $('#sceneSelectInput').append(`<optgroup label="${group}">${options}</optgroup>`);
+        $('#removeSceneInput').append(`<optgroup label="${group}">${options}</optgroup>`);
     }
 
     // used for the distance moved thang
@@ -290,20 +296,32 @@ $(window).ready(async () => {
 
     $('#newScene').click(async (e) => {
         try {
-            let name = $('#changeSceneModal #newSceneNameInput').val();
+            let name = $('#changeSceneModal #newSceneNameInput').val().trim();
             let file = $('#changeSceneModal #newImageFile').val();
             let unit = $('#changeSceneModal #mapUnitInput').val();
             let distance = $('#changeSceneModal #mapDistanceInput').val();
+
             if (file.trim() == '' || name.trim() == '' || unit.trim() == '' || distance.trim() == '') {
                 return false;
             }
+
             let image = await getUploadedFileContents($('#changeSceneModal #newImageFile'));
             if (!isFileImage(image)) {
                 alert("Filetype not supported.");
                 return false;
             }
 
-            let sceneId = `scene-` + name.replace(/[^[:alnum:]]/g, `-`).toLowerCase();
+            if (name.startsWith('/')) {
+                alert("Remove the '/' at the start of the name.");
+                return;
+            }
+
+            if (name.endsWith('/')) {
+                alert("Remove the '/' at the end of the name.");
+                return;
+            }
+
+            let sceneId = `scene_` + name.replace(/[^[:alnum:]]/g, `-`).toLowerCase();
             if (scenes.rows.some(s => s.id == sceneId)) {
                 alert(`'${name}' already exists`);
                 return false;
@@ -336,7 +354,7 @@ $(window).ready(async () => {
 
     $('#changeScene').click(async (e) => {
         try {
-            let id = $('#changeSceneModal form #sceneSelectInput>:selected').attr('id');
+            let id = $('#changeSceneModal form #sceneSelectInput option:selected').attr('id');
             if (id == null || id.trim().length == 0) {
                 return;
             }
@@ -350,7 +368,7 @@ $(window).ready(async () => {
 
     $('#removeScene').click(async (e) => {
         try {
-            let id = $('#changeSceneModal form #removeSceneInput>:selected').attr('id');
+            let id = $('#changeSceneModal form #removeSceneInput option:selected').attr('id');
             if (id == null || id.trim().length == 0) {
                 return;
             }
@@ -518,6 +536,13 @@ $(window).ready(async () => {
 
 });
 
+https://stackoverflow.com/a/34890276
+function groupBy(xs, key) {
+    return xs.reduce(function (rv, x) {
+        var v = key instanceof Function ? key(x) : x[key]; (rv[v] = rv[v] || []).push(x); return rv;
+    }, {});
+};
+
 function isFileImage(data) {
     try {
         return data.split(';')[0].split(':')[1].split('/')[0] == 'image';
@@ -550,6 +575,7 @@ function getImageDisplayDimensions(file, zoom) {
         i.src = file;
     })
 }
+
 function getTokenMarkup(token, imageUrl) {
     return `<div class="draggable ${(imageUrl.length > 0 ? "" : "no-image")}" 
             data-l="${token.l}" 
