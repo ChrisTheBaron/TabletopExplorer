@@ -80,6 +80,9 @@ $(window).ready(async () => {
         $('#removeSceneInput').append(`<option id="${s.id}">${s.doc.name}</option>`);
     }
 
+    // used for the distance moved thang
+    let startPosition;
+
     // target elements with the "draggable" class
     interact('.draggable')
         .draggable({
@@ -99,11 +102,17 @@ $(window).ready(async () => {
 
                 start(event) {
                     $(event.target).addClass("dragging");
+                    var target = event.target;
+                    var x = (parseFloat(target.getAttribute('data-x')) || 0);
+                    var y = (parseFloat(target.getAttribute('data-y')) || 0);
+                    startPosition = { x, y };
+                    $('#distanceMoved').text(`0 ${scene.unit}`).show();
                 },
 
                 end: async function (event) {
                     $(event.target).removeClass("dragging");
                     await saveChangesToDB();
+                    setTimeout(() => { $('#distanceMoved').hide(); }, 1000);
                 },
 
                 // call this function on every dragmove event
@@ -120,6 +129,11 @@ $(window).ready(async () => {
                     // update the position attributes
                     target.setAttribute('data-x', x)
                     target.setAttribute('data-y', y)
+
+                    let pxDist = Math.sqrt(Math.pow(x - startPosition.x, 2) + Math.pow(y - startPosition.y, 2));
+                    let unitDist = (pxDist * scene.distance) / (gridSize);
+                    $('#distanceMoved').text(`${Math.round(unitDist)} ${scene.unit}`).show();
+
                 }
 
             }
@@ -276,12 +290,14 @@ $(window).ready(async () => {
 
     $('#newScene').click(async (e) => {
         try {
-            let name = $('#changeSceneModal form #newSceneNameInput').val();
-            let file = $('#changeSceneModal form #newImageFile').val();
-            if (file.trim() == '' || name.trim() == '') {
+            let name = $('#changeSceneModal #newSceneNameInput').val();
+            let file = $('#changeSceneModal #newImageFile').val();
+            let unit = $('#changeSceneModal #mapUnitInput').val();
+            let distance = $('#changeSceneModal #mapDistanceInput').val();
+            if (file.trim() == '' || name.trim() == '' || unit.trim() == '' || distance.trim() == '') {
                 return false;
             }
-            let image = await getUploadedFileContents($('#changeSceneModal form #newImageFile'));
+            let image = await getUploadedFileContents($('#changeSceneModal #newImageFile'));
             if (!isFileImage(image)) {
                 alert("Filetype not supported.");
                 return false;
@@ -306,7 +322,9 @@ $(window).ready(async () => {
                 name: name,
                 background_zoom: 1,
                 background: imageName,
-                tokens: []
+                tokens: [],
+                unit: unit,
+                distance: distance
             };
             await db.put(newScene);
             window.localStorage.setItem(lsSceneName, sceneId);
@@ -581,6 +599,8 @@ async function initDb() {
             name: 'Tavern',
             background_zoom: 0.41551246537396125,
             background: defaultSceneMapName,
+            distance: 5,
+            unit: 'ft',
             tokens: [
                 {
                     x: 50,

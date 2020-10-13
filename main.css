@@ -10,7 +10,7 @@ main {
     margin: auto;
     background-size: contain;
     background-repeat: no-repeat;
-    margin-bottom: 54px;/*nav*/
+    margin-bottom: 54px; /*nav*/
 }
 
 nav {
@@ -138,4 +138,13 @@ nav {
     color: white;
     padding: 10px;
     overflow: hidden;
+}
+
+#distanceMoved {
+    color: white;
+    font-size: 30px;
+    position: absolute;
+    top: 0;
+    left: 5px;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
