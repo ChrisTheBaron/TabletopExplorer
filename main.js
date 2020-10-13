@@ -6,11 +6,27 @@ const dbName = 'tabletop.explorer';
 const imageAttachmentName = 'image';
 const lsSceneName = "scene";
 const lsShownHelp = 'shownHelp';
+const lsZoom = 'zoom';
 
 const tokenImageDocumentName = "tokens";
 const mapImageDocumentName = "maps";
 
 $(window).ready(async () => {
+
+    let zoom = 1.0;
+    if (window.localStorage.getItem(lsZoom) != null) {
+        zoom = parseFloat(window.localStorage.getItem(lsZoom));
+    }
+
+    $('main').css('font-size', zoom + 'px');
+    $('#zoomInput').val(zoom);
+
+    $('#zoomInput').change((e) => {
+        let zoom = parseFloat($(e.target).val());
+        $('main').css('font-size', zoom + 'px');
+        window.localStorage.setItem(lsZoom, zoom);
+    });
+
 
     if (window.localStorage.getItem(lsShownHelp) != lsShownHelp) {
         let el = document.getElementById('helpModal');
@@ -36,8 +52,8 @@ $(window).ready(async () => {
     let main = document.getElementById(mainTagID);
 
     main.style.backgroundImage = `url('${imageUrl}')`;
-    main.style.height = `${imageDim.height}px`;
-    main.style.width = `${imageDim.width}px`;
+    main.style.height = `${imageDim.height}em`;
+    main.style.width = `${imageDim.width}em`;
 
 
     for (let token of scene.tokens) {
@@ -130,7 +146,7 @@ $(window).ready(async () => {
 
                     // translate the element
                     target.style.transform =
-                        'translate(' + x + 'px, ' + y + 'px)'
+                        'translate(' + x + 'em, ' + y + 'em)'
 
                     // update the position attributes
                     target.setAttribute('data-x', x)
@@ -431,9 +447,9 @@ $(window).ready(async () => {
                 data-w="${gridSize * size}"
                 data-h="${gridSize * size}"
                 style="
-                    transform: translate(10px, 10px);
-                    width: ${gridSize * size}px;
-                    height: ${gridSize * size}px;
+                    transform: translate(10em, 10em);
+                    width: ${gridSize * size}em;
+                    height: ${gridSize * size}em;
                 ">Adjust this to match a ${size}x${size} token and then hit 'Set Background Size'.</div>`);
 
             interact('.resize-drag')
@@ -448,15 +464,15 @@ $(window).ready(async () => {
                             let y = (parseFloat(target.getAttribute('data-y')) || 0)
 
                             // update the element's style
-                            target.style.width = event.rect.width + 'px'
-                            target.style.height = event.rect.height + 'px'
+                            target.style.width = event.rect.width + 'em'
+                            target.style.height = event.rect.height + 'em'
 
                             // translate when resizing from top or left edges
                             x += event.deltaRect.left
                             y += event.deltaRect.top
 
                             target.style.webkitTransform = target.style.transform =
-                                'translate(' + x + 'px,' + y + 'px)'
+                                'translate(' + x + 'em,' + y + 'em)'
 
                             target.setAttribute('data-x', x)
                             target.setAttribute('data-y', y)
@@ -488,7 +504,7 @@ $(window).ready(async () => {
 
                             // translate the element
                             target.style.transform =
-                                'translate(' + x + 'px, ' + y + 'px)'
+                                'translate(' + x + 'em, ' + y + 'em)'
 
                             // update the position attributes
                             target.setAttribute('data-x', x)
@@ -586,10 +602,10 @@ function getTokenMarkup(token, imageUrl) {
             data-b="${token.b || ''}"
             data-r="${token.r || 0}"
             style="
-                transform: translate(${token.x}px, ${token.y}px);
+                transform: translate(${token.x}em, ${token.y}em);
                 background-color: ${token.f || '#00000000'};
-                width: ${token.s || 1}px;
-                height: ${token.s || 1}px;
+                width: ${token.s || 1}em;
+                height: ${token.s || 1}em;
             ">
             ${(imageUrl.length > 0 ? `<div class="image" style="background-image: url('${imageUrl}');"></div>` : "")}
         </div>`;

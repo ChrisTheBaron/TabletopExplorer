@@ -11,6 +11,7 @@ main {
     background-size: contain;
     background-repeat: no-repeat;
     margin-bottom: 54px; /*nav*/
+    font-size: 1px;
 }
 
 nav {
@@ -34,6 +35,7 @@ nav {
     }
 
     .draggable::before {
+        font-size: 12px;
         display: block;
         content: attr(data-l);
         position: relative;
