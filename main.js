@@ -451,135 +451,153 @@ $(window).ready(async () => {
         }
     });
 
-    let settingBackgroundSize = false;
+    $('#acceptBackgroundSize').click(async () => {
+        try {
+            // set the size and refresh
+            let size = parseInt($('.resize-drag').attr('data-s'));
+            let width = parseFloat($('.resize-drag').attr('data-w'));
+            let height = parseFloat($('.resize-drag').attr('data-h'));
+            let pixelPerGrid = Math.sqrt(width * height) / size;
+            let new_zoom = gridSize / pixelPerGrid;
+            scene = await db.get(scene._id);
+            scene.background_zoom = new_zoom * scene.background_zoom;
+            console.log("New Zoom", scene.background_zoom);
+            await db.put(scene);
+            scene = await db.get(scene._id);
+            await saveChangesToDB();
+            location.reload();
+        } catch (e) {
+            alert(e.message);
+        }
+    });
+
+    $('#cancelBackgroundSize').click(async () => {
+        await saveChangesToDB();
+        location.reload();
+    });
+
     $('#setBackgroundSize').click(async (e) => {
-        if (settingBackgroundSize) {
-            try {
-                // set the size and refresh
-                let size = parseInt($('.resize-drag').attr('data-s'));
-                let width = parseFloat($('.resize-drag').attr('data-w'));
-                let height = parseFloat($('.resize-drag').attr('data-h'));
-                let pixelPerGrid = Math.sqrt(width * height) / size;
-                let new_zoom = gridSize / pixelPerGrid;
-                scene = await db.get(scene._id);
-                scene.background_zoom = new_zoom * scene.background_zoom;
-                console.log("New Zoom", scene.background_zoom);
-                await db.put(scene);
-                scene = await db.get(scene._id);
-                await saveChangesToDB();
-                location.reload();
-            } catch (e) {
-                alert(e.message);
-            }
-        } else {
 
-            let returned = window.prompt("Select size of reference grid. " +
-                "Please adjust the size of the square until it covers " +
-                "the same area.", "3");
+        let returned = window.prompt("Select size of reference grid. " +
+            "Please adjust the size of the square until it covers " +
+            "the same area.", "3");
 
-            if (returned == null) {
-                return;
-            }
+        if (returned == null) {
+            return;
+        }
 
-            let size;
+        let size;
 
-            try {
-                size = parseInt(returned);
-            } catch (e) {
-                console.error(e);
-                return false;
-            }
+        try {
+            size = parseInt(returned);
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
 
-            if (size == null || !Number.isInteger(size)) {
-                console.log(size, "not an int");
-                return false;
-            }
+        if (size == null || !Number.isInteger(size)) {
+            console.log(size, "not an int");
+            return false;
+        }
 
-            // hide the tokens
-            $('.draggable').addClass('d-none');
+        // reset the zoom to 1.0 and disable all other functionality
+        $('#zoomInput').val(1.0).change();
+        $('[data-toggle="modal"][data-target="#addTokenModal"]').hide();
+        $('[data-toggle="modal"][data-target="#changeImageModal"]').hide();
+        $('[data-toggle="modal"][data-target="#changeSceneModal"]').hide();
+        $('[data-toggle="modal"][data-target="#helpModal"]').hide();
+        $('#removeTokens').hide();
+        $('#zoomInput').hide();
+        $('#removeTokensOuter').hide();
+        $('#setBackgroundSize').hide();
 
-            // show the reference square
-            $('main').append(`<div class="resize-drag" 
+        $('#acceptBackgroundSize').show();
+        $('#cancelBackgroundSize').show();
+
+        // hide the tokens
+        $('.draggable').hide();
+
+        // show the reference square
+        $('main').append(`<div class="resize-drag" 
                 data-x="10"
                 data-y="10"
                 data-s="${size}" 
                 data-w="${gridSize * size}"
                 data-h="${gridSize * size}"
+                data-l="${size}x${size}"
                 style="
                     transform: translate(10em, 10em);
                     width: ${gridSize * size}em;
                     height: ${gridSize * size}em;
-                ">Adjust this to match a ${size}x${size} token and then hit 'Set Background Size'.</div>`);
+                "></div>`);
 
-            interact('.resize-drag')
-                .resizable({
-                    // resize from all edges and corners
-                    edges: { left: true, right: true, bottom: true, top: true },
+        interact('.resize-drag')
+            .resizable({
+                // resize from all edges and corners
+                edges: { left: true, right: true, bottom: true, top: true },
 
-                    listeners: {
-                        move(event) {
-                            let target = event.target
-                            let x = (parseFloat(target.getAttribute('data-x')) || 0)
-                            let y = (parseFloat(target.getAttribute('data-y')) || 0)
+                listeners: {
+                    move(event) {
+                        let target = event.target
+                        let x = (parseFloat(target.getAttribute('data-x')) || 0)
+                        let y = (parseFloat(target.getAttribute('data-y')) || 0)
 
-                            // update the element's style
-                            target.style.width = event.rect.width + 'em'
-                            target.style.height = event.rect.height + 'em'
+                        // update the element's style
+                        target.style.width = event.rect.width + 'em'
+                        target.style.height = event.rect.height + 'em'
 
-                            // translate when resizing from top or left edges
-                            x += event.deltaRect.left
-                            y += event.deltaRect.top
+                        // translate when resizing from top or left edges
+                        x += event.deltaRect.left
+                        y += event.deltaRect.top
 
-                            target.style.webkitTransform = target.style.transform =
-                                'translate(' + x + 'em,' + y + 'em)'
+                        target.style.webkitTransform = target.style.transform =
+                            'translate(' + x + 'em,' + y + 'em)'
 
-                            target.setAttribute('data-x', x)
-                            target.setAttribute('data-y', y)
+                        target.setAttribute('data-x', x)
+                        target.setAttribute('data-y', y)
 
-                            target.setAttribute('data-w', event.rect.width)
-                            target.setAttribute('data-h', event.rect.height)
-                        }
-                    },
-                    modifiers: [
-                        // keep the edges inside the parent
-                        interact.modifiers.restrictEdges({
-                            outer: 'parent'
-                        }),
+                        target.setAttribute('data-w', event.rect.width)
+                        target.setAttribute('data-h', event.rect.height)
+                    }
+                },
+                modifiers: [
+                    // keep the edges inside the parent
+                    interact.modifiers.restrictEdges({
+                        outer: 'parent'
+                    }),
 
-                        // minimum size
-                        interact.modifiers.restrictSize({
-                            min: { width: 50, height: 50 }
-                        })
-                    ],
-                })
-                .draggable({
-                    listeners: {
-                        // call this function on every dragmove event
-                        move(event) {
-                            var target = event.target
-                            // keep the dragged position in the data-x/data-y attributes
-                            var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
-                            var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
+                    // minimum size
+                    interact.modifiers.restrictSize({
+                        min: { width: 50, height: 50 }
+                    })
+                ],
+            })
+            .draggable({
+                listeners: {
+                    // call this function on every dragmove event
+                    move(event) {
+                        var target = event.target
+                        // keep the dragged position in the data-x/data-y attributes
+                        var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
+                        var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
 
-                            // translate the element
-                            target.style.transform =
-                                'translate(' + x + 'em, ' + y + 'em)'
+                        // translate the element
+                        target.style.transform =
+                            'translate(' + x + 'em, ' + y + 'em)'
 
-                            // update the position attributes
-                            target.setAttribute('data-x', x)
-                            target.setAttribute('data-y', y)
-                        }
-                    },
-                    modifiers: [
-                        interact.modifiers.restrictRect({
-                            restriction: 'parent',
-                            endOnly: true
-                        })
-                    ]
-                })
+                        // update the position attributes
+                        target.setAttribute('data-x', x)
+                        target.setAttribute('data-y', y)
+                    }
+                },
+                modifiers: [
+                    interact.modifiers.restrictRect({
+                        restriction: 'parent',
+                        endOnly: false
+                    })
+                ]
+            })
 
-            settingBackgroundSize = true;
-        }
     });
 
     $('#clearAllData').click(async () => {
