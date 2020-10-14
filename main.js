@@ -353,8 +353,11 @@ $(window).ready(async () => {
         try {
             let name = $('#changeSceneModal #newSceneNameInput').val().trim();
             let file = $('#changeSceneModal #newImageFile').val();
-            let unit = $('#changeSceneModal #mapUnitInput').val();
-            let distance = $('#changeSceneModal #mapDistanceInput').val();
+
+            let unit = $('#changeSceneModal #mapUnitInput').val() ||
+                $('#changeSceneModal #mapUnitInput').attr('placeholder');
+            let distance = $('#changeSceneModal #mapDistanceInput').val() ||
+                $('#changeSceneModal #mapDistanceInput').attr('placeholder');
 
             if (file.trim() == '' || name.trim() == '' || unit.trim() == '' || distance.trim() == '') {
                 return false;
