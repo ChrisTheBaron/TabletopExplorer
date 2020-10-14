@@ -233,7 +233,7 @@ $(window).ready(async () => {
             imageAttachmentName = $('#my-icon-select .icon.selected img').attr('icon-value');
             image = $('#my-icon-select .icon.selected img')[0].src;
         } else if ($('#addTokenModal form #tokenImageFile').val().trim().length > 0) {
-            image = await getUploadedFileContents($('#addTokenModal form #tokenImageFile'));
+            image = await getUploadedFileContentsAsURL($('#addTokenModal form #tokenImageFile'));
             if (!isFileImage(image)) {
                 alert("Filetype not supported.");
                 return false;
@@ -307,7 +307,7 @@ $(window).ready(async () => {
             if (file.trim() == '') {
                 return false;
             }
-            let image = await getUploadedFileContents($('#changeImageModal form #changeImageFile'));
+            let image = await getUploadedFileContentsAsURL($('#changeImageModal form #changeImageFile'));
             if (!isFileImage(image)) {
                 alert("Filetype not supported.");
                 return false;
@@ -360,7 +360,7 @@ $(window).ready(async () => {
                 return false;
             }
 
-            let image = await getUploadedFileContents($('#changeSceneModal #newImageFile'));
+            let image = await getUploadedFileContentsAsURL($('#changeSceneModal #newImageFile'));
             if (!isFileImage(image)) {
                 alert("Filetype not supported.");
                 return false;
@@ -588,6 +588,129 @@ $(window).ready(async () => {
         }
     });
 
+    $('#importData').click(async () => {
+        if (confirm('This will remove all existing data. Are you sure you want to continue?')) {
+            $('#importDataPicker').click();
+        }
+    });
+
+    $('#importDataPicker').change(async () => {
+
+        let newScenes;
+        let zip;
+
+        try {
+            let fileContents = await getUploadedFileContentsAsBinaryString($('#importDataPicker'));
+            var zipFile = new JSZip();
+            zip = await zipFile.loadAsync(fileContents);
+            let dbFile = await zip.file("scenes.json");
+            if (dbFile == null) {
+                alert("Invalid archive.");
+                return false;
+            }
+            newScenes = JSON.parse(await dbFile.async("string"));
+        } catch (e) {
+            console.error(e);
+            alert("Import failed.")
+            return false;
+        }
+
+        // well no going back now
+
+        await db.destroy();
+        db = new PouchDB(dbName);
+
+        for (let i in newScenes.rows) {
+            let newScene = newScenes.rows[i].doc;
+            delete newScene._attachments;
+            delete newScene._rev;
+            await db.put(newScene);
+            console.log("inserted scene", newScene._id);
+        }
+
+        let tokens = zip.folder(tokenImageDocumentName);
+
+        let tokenFiles = [];
+
+        tokens.forEach(function (relativePath, file) {
+            tokenFiles.push(relativePath);
+        });
+
+        let tokenImageDoc = await db.get(tokenImageDocumentName);
+
+        for (let relativePath of tokenFiles) {
+            let ext = relativePath.split('.')[1];
+            let name = relativePath.split('.')[0];
+            let content = await tokens.file(relativePath).async('base64');
+            console.log("inserting token", name);
+            let resp = await db.putAttachment(tokenImageDocumentName, name, tokenImageDoc._rev, content, 'image/' + ext);
+            tokenImageDoc._rev = resp.rev;
+            console.log("inserted token", name);
+        }
+
+        let maps = zip.folder(mapImageDocumentName);
+
+        let mapFiles = [];
+
+        maps.forEach(function (relativePath, file) {
+            mapFiles.push(relativePath);
+        });
+
+        let mapImageDoc = await db.get(mapImageDocumentName);
+
+        for (let relativePath of mapFiles) {
+            let ext = relativePath.split('.')[1];
+            let name = relativePath.split('.')[0];
+            let content = await maps.file(relativePath).async('base64');
+            console.log("inserting map", name);
+            let resp = await db.putAttachment(mapImageDocumentName, name, mapImageDoc._rev, content, 'image/' + ext);
+            mapImageDoc._rev = resp.rev;
+            console.log("inserted map", name);
+        }
+
+        for (let i in newScenes.rows) {
+            if (newScenes.rows[i].doc._id == mapImageDocumentName ||
+                newScenes.rows[i].doc._id == tokenImageDocumentName) {
+                continue;
+            }
+            window.localStorage.setItem(lsSceneName, newScenes.rows[i].doc._id);
+            console.log("Set new scene", newScenes.rows[i].doc._id);
+            break;
+        }
+
+        alert("Import complete. Page will now reload.");
+        location.reload(true);
+
+    });
+
+    $('#exportData').click(async () => {
+
+        var zip = new JSZip();
+
+        let scenes = await db.allDocs({ include_docs: true });
+        // Add an top-level, arbitrary text file with contents
+        zip.file("scenes.json", JSON.stringify(scenes));
+
+        let tokenImageDoc = await db.get(tokenImageDocumentName, { attachments: true });
+        let tokens = zip.folder(tokenImageDocumentName);
+
+        for (let i in tokenImageDoc._attachments) {
+            tokens.file(i + '.' + tokenImageDoc._attachments[i].content_type.split('/')[1], tokenImageDoc._attachments[i].data, { base64: true });
+        }
+
+        let mapImageDoc = await db.get(mapImageDocumentName, { attachments: true });
+        let maps = zip.folder(mapImageDocumentName);
+
+        for (let i in mapImageDoc._attachments) {
+            maps.file(i + '.' + mapImageDoc._attachments[i].content_type.split('/')[1], mapImageDoc._attachments[i].data, { base64: true });
+        }
+
+        // Generate the zip file asynchronously
+        let z = await zip.generateAsync({ type: "blob" })
+        download(z, "tabletop-explorer.zip");
+
+    });
+
     async function saveChangesToDB() {
         scene.tokens = [];
         for (let r of $(main).find('.draggable')) {
@@ -625,7 +748,7 @@ function isFileImage(data) {
     }
 }
 
-function getUploadedFileContents(target) {
+function getUploadedFileContentsAsURL(target) {
     return new Promise(function (resolved, rejected) {
         var files = $(target)[0].files;
         f = files[0];
@@ -635,6 +758,19 @@ function getUploadedFileContents(target) {
         };
         reader.onerror = rejected;
         reader.readAsDataURL(f);
+    });
+}
+
+function getUploadedFileContentsAsBinaryString(target) {
+    return new Promise(function (resolved, rejected) {
+        var files = $(target)[0].files;
+        f = files[0];
+        var reader = new FileReader();
+        reader.onload = (e) => {
+            resolved(e.target.result);
+        };
+        reader.onerror = rejected;
+        reader.readAsBinaryString(f);
     });
 }
 

@@ -117,7 +117,7 @@
                             </div>
                             <div class="col-sm-7">
                                 <div class="form-file">
-                                    <input type="file" class="form-file-input" id="tokenImageFile">
+                                    <input type="file" class="form-file-input" id="tokenImageFile" accept="image/*" />
                                     <label class="form-file-label" for="tokenImageFile">
                                         <span class="form-file-text">Choose file...</span>
                                         <span class="form-file-button">Browse</span>
@@ -173,7 +173,7 @@
                         <div class="row mb-3">
                             <div class="col">
                                 <div class="form-file">
-                                    <input readonly type="file" class="form-file-input" id="changeImageFile">
+                                    <input required type="file" class="form-file-input" id="changeImageFile" accept="image/*">
                                     <label class="form-file-label" for="changeImageFile">
                                         <span class="form-file-text">Choose file...</span>
                                         <span class="form-file-button">Browse</span>
@@ -229,7 +229,7 @@
                             <label for="newImageFile" class="col-sm-3 col-form-label">Background</label>
                             <div class="col-sm-9">
                                 <div class="form-file">
-                                    <input required type="file" class="form-file-input" id="newImageFile">
+                                    <input required type="file" class="form-file-input" id="newImageFile" accept="image/*" />
                                     <label class="form-file-label" for="newImageFile">
                                         <span class="form-file-text">Choose file...</span>
                                         <span class="form-file-button">Browse</span>
@@ -492,6 +492,24 @@
                                                 uuid
                                             </a>
                                         </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://stuk.github.io/jszip/">
+                                                JSZip
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://github.com/rndme/download">
+                                                download
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://bug7a.github.io/iconselect.js/">
+                                                iconselect.js
+                                            </a>
+                                        </li>
                                     </ul>
                                     <p>
                                         Acknowledgements
@@ -510,6 +528,34 @@
                                             </a>
                                         </li>
                                     </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header p-0" id="headingExportImport">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-light btn-block text-left p-3 rounded-0" type="button" data-toggle="collapse" data-target="#collapseExportImport" aria-expanded="false" aria-controls="collapseExportImport">
+                                        Export/Import Data
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseExportImport" class="collapse" aria-labelledby="headingExportImport" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <button id="exportData" class="btn btn-block btn-success">
+                                                Export Data
+                                            </button>
+                                        </div>
+                                        <div class="col-6">
+                                            <button id="importData" class="btn btn-block btn-warning">
+                                                Import Data
+                                            </button>
+                                            <input type="file" id="importDataPicker" style="display:none" accept=".zip" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -558,9 +604,14 @@
 
     <script src="./lib/pouchdb-7.2.1.min.js"></script>
 
+    <script src="./lib/download.js"></script>
+
+    <script src="./lib/jszip.min.js"></script>
+
     <script src="./tokenNameTypeahead.js"></script>
 
     <script src="./lib/iconselect.js-1.0/lib/control/iconselect.js"></script>
+
     <script src="./lib/iconselect.js-1.0/lib/iscroll.js"></script>
 
     <script src="./main.js"></script>
