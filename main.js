@@ -211,7 +211,9 @@ $(window).ready(async () => {
         $('#my-icon-select .icon img[icon-value=""]').parent('.icon').click();
     })
 
-    $('#addToken').click(async (e) => {
+    $('#addTokenForm').submit(async (e) => {
+
+        e.preventDefault();
 
         let label = $('#addTokenModal form #tokenLabelInput').val();
         let colour = $('#addTokenModal form #tokenColourInput').val();
@@ -296,7 +298,10 @@ $(window).ready(async () => {
         }
     });
 
-    $('#changeImage').click(async (e) => {
+    $('#changeImageForm').submit(async (e) => {
+
+        e.preventDefault();
+
         try {
             let file = $('#changeImageModal form #changeImageFile').val();
             if (file.trim() == '') {
@@ -341,7 +346,10 @@ $(window).ready(async () => {
         }
     });
 
-    $('#newScene').click(async (e) => {
+    $('#newSceneForm').submit(async (e) => {
+
+        e.preventDefault();
+
         try {
             let name = $('#changeSceneModal #newSceneNameInput').val().trim();
             let file = $('#changeSceneModal #newImageFile').val();
@@ -399,7 +407,10 @@ $(window).ready(async () => {
         }
     });
 
-    $('#changeScene').click(async (e) => {
+    $('#changeSceneForm').submit(async (e) => {
+
+        e.preventDefault();
+
         try {
             let id = $('#changeSceneModal form #sceneSelectInput option:selected').attr('id');
             if (id == null || id.trim().length == 0) {
@@ -413,7 +424,10 @@ $(window).ready(async () => {
         }
     });
 
-    $('#removeScene').click(async (e) => {
+    $('#removeSceneForm').submit(async (e) => {
+
+        e.preventDefault();
+
         try {
             let id = $('#changeSceneModal form #removeSceneInput option:selected').attr('id');
             if (id == null || id.trim().length == 0) {
@@ -464,7 +478,19 @@ $(window).ready(async () => {
                 return;
             }
 
-            let size = parseInt(returned);
+            let size;
+
+            try {
+                size = parseInt(returned);
+            } catch (e) {
+                console.error(e);
+                return false;
+            }
+
+            if (size == null || !Number.isInteger(size)) {
+                console.log(size, "not an int");
+                return false;
+            }
 
             // hide the tokens
             $('.draggable').addClass('d-none');
