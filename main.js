@@ -22,7 +22,7 @@ $(window).ready(async () => {
     $('#zoomInput').val(zoom);
 
     $('#zoomInput').change((e) => {
-        let zoom = parseFloat($(e.target).val());
+        zoom = parseFloat($(e.target).val());
         $('main').css('font-size', zoom + 'px');
         window.localStorage.setItem(lsZoom, zoom);
     });
@@ -166,8 +166,8 @@ $(window).ready(async () => {
                 move(event) {
                     var target = event.target
                     // keep the dragged position in the data-x/data-y attributes
-                    var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
-                    var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
+                    var x = (parseFloat(target.getAttribute('data-x')) || 0) + (event.dx / zoom)
+                    var y = (parseFloat(target.getAttribute('data-y')) || 0) + (event.dy / zoom)
 
                     // translate the element
                     target.style.transform =
