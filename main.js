@@ -256,23 +256,43 @@ $(window).ready(async () => {
             colour = "#00000000";
         }
 
-        for (let i = 1; i <= number; i++) {
-            let labelN = label;
-            if (number > 1) {
-                labelN = `${label} ${numberToLabel(i, numbering)}`;
+        let [x, y] = getCentreOfMapOnDisplay();
+
+        if (number > 1) {
+
+            let squareLength = Math.ceil(Math.pow(number, 0.5));
+
+            let originX = x - (size * squareLength * 0.5 / tokenBufferZoom);
+            let originY = y - (size * squareLength * 0.5 / tokenBufferZoom);
+
+            for (let i = 0; i < number; i++) {
+
+                let x = originX + ((i % squareLength) * size / tokenBufferZoom);
+                let y = originY + (Math.floor(i / squareLength) * size / tokenBufferZoom);
+
+                $(main).append(getTokenMarkup({
+                    s: size,
+                    x: x - (size / 2),
+                    y: y - (size / 2),
+                    b: imageAttachmentName,
+                    f: colour,
+                    l: `${label} ${numberToLabel(i + 1, numbering)}`,
+                    r: 0
+                }, image));
+
             }
 
-            let token = {
+        } else {
+
+            $(main).append(getTokenMarkup({
                 s: size,
-                x: 10,
-                y: 10,
+                x: x - (size / 2),
+                y: y - (size / 2),
                 b: imageAttachmentName,
                 f: colour,
-                l: labelN,
+                l: label,
                 r: 0
-            };
-
-            $(main).append(getTokenMarkup(token, image));
+            }, image));
 
         }
 
@@ -541,16 +561,21 @@ $(window).ready(async () => {
         // hide the tokens
         $('.draggable').hide();
 
+        let [x, y] = getCentreOfMapOnDisplay();
+
+        x -= (gridSize * size) / 2;
+        y -= (gridSize * size) / 2;
+
         // show the reference square
         $('main').append(`<div class="resize-drag" 
-                data-x="10"
-                data-y="10"
+                data-x="${x}"
+                data-y="${y}"
                 data-s="${size}" 
                 data-w="${gridSize * size}"
                 data-h="${gridSize * size}"
                 data-l="${size}x${size}"
                 style="
-                    transform: translate(10em, 10em);
+                    transform: translate(${x}em, ${y}em);
                     width: ${gridSize * size}em;
                     height: ${gridSize * size}em;
                 "></div>`);
@@ -755,6 +780,24 @@ $(window).ready(async () => {
         download(z, "tabletop-explorer.zip");
 
     });
+
+    function getCentreOfMapOnDisplay() {
+
+        let x = ((imageDim.width) / 2);
+        if ((imageDim.width * zoom) > window.innerWidth) {
+            let scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
+            x = ((window.innerWidth / 2) + scrollLeft) / zoom;
+        }
+
+        let y = ((imageDim.height) / 2);
+        if ((imageDim.height * zoom) > window.innerHeight) {
+            let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            y = ((window.innerHeight / 2) + scrollTop) / zoom;
+        }
+
+        return [x, y];
+
+    }
 
     async function saveChangesToDB() {
         scene.tokens = [];
