@@ -59,8 +59,8 @@ $(window).ready(async () => {
 
     let iconSelect = new IconSelect("my-icon-select",
         {
-            'selectedIconWidth': 48,
-            'selectedIconHeight': 48,
+            'selectedIconWidth': 30,
+            'selectedIconHeight': 30,
             'selectedBoxPadding': 1,
             'iconsWidth': 48,
             'iconsHeight': 48,

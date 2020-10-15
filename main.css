@@ -158,3 +158,12 @@ nav {
         overflow-y: scroll !important;
         width: 126px !important;
     }
+
+    .icon-select .selected-box, .icon-select .selected-box:hover {
+        width: 50px;
+        height: 38px;
+    }
+
+.form-control-color {
+    max-width: initial;
+}

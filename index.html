@@ -91,25 +91,27 @@
                     <form autocomplete="off" id="addTokenForm">
 
                         <div class="row mb-3">
-                            <label for="tokenLabelInput" class="col-sm-3 col-form-label">Label</label>
-                            <div class="col-sm-9">
+                            <label for="tokenLabelInput" class="col-sm-2 col-form-label">Label</label>
+                            <div class="col-sm">
                                 <input required type="text" class="form-control" placeholder="Goblin" id="tokenLabelInput">
                             </div>
                         </div>
 
                         <div class="row mb-3">
-                            <label for="tokenColourInput" class="col-sm-3 col-form-label">Colour</label>
-                            <div class="col-sm-9">
-                                <input type="color" class="form-control form-control-color" id="tokenColourInput" value="#563d7c" title="Choose your color">
+                            <div class="col-sm-12">
+                                <p class="form-text">
+                                    Select a colour for the token, a recently
+                                    used image or upload a new image.
+                                </p>
                             </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label class="col-sm-3 col-form-label">Image</label>
+                            <label class="col-sm-2 col-form-label">Image</label>
+                            <div class="col-sm-2">
+                                <input type="color" class="form-control form-control-color" id="tokenColourInput" title="Choose your color">
+                            </div>
                             <div class="col-sm-2">
                                 <div id="my-icon-select"></div>
                             </div>
-                            <div class="col-sm-7">
+                            <div class="col-sm-6">
                                 <div class="form-file">
                                     <input type="file" class="form-file-input" id="tokenImageFile" accept="image/*" />
                                     <label class="form-file-label" for="tokenImageFile">
@@ -121,22 +123,22 @@
                         </div>
 
                         <div class="row mb-3">
-                            <label for="tokenSizeInput" class="col-sm-3 col-form-label">Size</label>
-                            <div class="col-sm-9">
+                            <label for="tokenSizeInput" class="col-sm-2 col-form-label">Size</label>
+                            <div class="col-sm">
                                 <input required type="number" step="1" min="1" max="10" value="1" class="form-control" id="tokenSizeInput">
                             </div>
                         </div>
 
                         <div class="row mb-3">
-                            <label for="tokenNumberInput" class="col-sm-3 col-form-label">Number</label>
-                            <div class="col-sm-9">
+                            <label for="tokenNumberInput" class="col-sm-2 col-form-label">Number</label>
+                            <div class="col-sm">
                                 <input required type="number" step="1" min="1" value="1" class="form-control" id="tokenNumberInput">
                             </div>
                         </div>
 
                         <div class="row mb-3">
-                            <label for="tokenNumberingInput" class="col-sm-3 col-form-label">Style</label>
-                            <div class="col-sm-9">
+                            <label for="tokenNumberingInput" class="col-sm-2 col-form-label">Style</label>
+                            <div class="col-sm">
                                 <select class="form-select" required id="tokenNumberingInput">
                                     <option selected value="numeric">1, 2, 3</option>
                                     <option value="alphabetic">A, B, C</option>
