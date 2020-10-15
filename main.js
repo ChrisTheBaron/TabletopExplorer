@@ -218,6 +218,9 @@ $(window).ready(async () => {
             } else {
                 $(e.target).parent('.draggable').remove();
             }
+            if ($('main').find('.draggable').length == 0) {
+                $('#removeTokens').click();
+            }
             await saveChangesToDB();
         };
     });
