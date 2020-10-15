@@ -186,3 +186,13 @@ nav {
     user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 }
+
+#dragMarker {
+    height: 5px;
+    background-color: black;
+    border: 0.1px solid white;
+    position: absolute;
+    display: inline;
+    border-radius: 2.5px;
+    transform-origin: left center;
+}

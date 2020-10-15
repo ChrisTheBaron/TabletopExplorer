@@ -158,7 +158,10 @@ $(window).ready(async () => {
                 end: async function (event) {
                     $(event.target).removeClass("dragging");
                     await saveChangesToDB();
-                    setTimeout(() => { $('#distanceMoved').hide(); }, 1000);
+                    setTimeout(() => {
+                        $('#distanceMoved').hide();
+                        $('#dragMarker').hide();
+                    }, 750);
                 },
 
                 // call this function on every dragmove event
@@ -179,6 +182,19 @@ $(window).ready(async () => {
                     let pxDist = Math.sqrt(Math.pow(x - startPosition.x, 2) + Math.pow(y - startPosition.y, 2));
                     let unitDist = (pxDist * scene.distance) / (gridSize);
                     $('#distanceMoved').text(`${Math.round(unitDist)} ${scene.unit}`).show();
+
+                    let angle = Math.atan((y - startPosition.y) / (x - startPosition.x));
+                    if ((x - startPosition.x) < 0) {
+                        angle += Math.PI;
+                    }
+
+                    let size = parseFloat(target.getAttribute('data-s')) / 2;
+
+                    $('#dragMarker').css('transform', `rotate(${angle}rad)`);
+                    $('#dragMarker').css('width', `${pxDist}em`);
+                    $('#dragMarker').css('margin-top', `${startPosition.y + size}em`);
+                    $('#dragMarker').css('margin-left', `${startPosition.x + size}em`);
+                    $('#dragMarker').show();
 
                 }
 
