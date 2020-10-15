@@ -181,14 +181,19 @@ $(window).ready(async () => {
 
                     let pxDist = Math.sqrt(Math.pow(x - startPosition.x, 2) + Math.pow(y - startPosition.y, 2));
                     let unitDist = (pxDist * scene.distance) / (gridSize);
-                    $('#distanceMoved').text(`${Math.round(unitDist)} ${scene.unit}`).show();
+
+                    let size = parseFloat(target.getAttribute('data-s')) / 2;
+
+                    let midX = startPosition.x + ((x - startPosition.x) / 2);
+                    let midY = startPosition.y + ((y - startPosition.y) / 2);
+
+                    $('#distanceMoved').css('transform', 'translate(' + (midX + size) + 'em, ' + (midY + size) + 'em)');
+                    $('#distanceMoved').attr('data-l', `${Math.round(unitDist)} ${scene.unit}`).show();
 
                     let angle = Math.atan((y - startPosition.y) / (x - startPosition.x));
                     if ((x - startPosition.x) < 0) {
                         angle += Math.PI;
                     }
-
-                    let size = parseFloat(target.getAttribute('data-s')) / 2;
 
                     $('#dragMarker').css('transform', `rotate(${angle}rad)`);
                     $('#dragMarker').css('width', `${pxDist}em`);

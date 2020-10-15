@@ -148,15 +148,6 @@ nav {
     overflow: hidden;
 }
 
-#distanceMoved {
-    color: white;
-    font-size: 30px;
-    position: fixed;
-    top: 0;
-    left: 5px;
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-}
-
 .icon-select {
     z-index: 5;
 }
@@ -186,6 +177,22 @@ nav {
     user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 }
+
+#distanceMoved {
+    position: absolute;
+}
+
+    #distanceMoved::after {
+        display: inline-block;
+        content: attr(data-l);
+        font-size: 20px;
+        color: white;
+        background-color: black;
+        padding: 0px 5px;
+        position: relative;
+        top: -15px;
+        left: -25px;
+    }
 
 #dragMarker {
     height: 5px;
