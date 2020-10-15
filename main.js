@@ -13,19 +13,6 @@ const mapImageDocumentName = "maps";
 
 $(window).ready(async () => {
 
-    let zoom = 1.0;
-    if (window.localStorage.getItem(lsZoom) != null) {
-        zoom = parseFloat(window.localStorage.getItem(lsZoom));
-    }
-
-    $('#zoomInput').on('input', (e) => {
-        zoom = parseFloat($(e.target).val());
-        $('main').css('font-size', zoom + 'px');
-        window.localStorage.setItem(lsZoom, zoom);
-    });
-
-    $('#zoomInput').val(zoom).trigger('input');
-
     if (window.localStorage.getItem(lsShownHelp) != lsShownHelp) {
         let el = document.getElementById('helpModal');
         let helpModal = new bootstrap.Modal(el);
@@ -52,6 +39,49 @@ $(window).ready(async () => {
     main.style.backgroundImage = `url('${imageUrl}')`;
     main.style.height = `${imageDim.height}em`;
     main.style.width = `${imageDim.width}em`;
+
+    //------------------------------------------------------------------------
+    // Zooming
+
+    let zoom = 1.0; // a sensible default
+    if (window.localStorage.getItem(lsZoom) != null) {
+        try {
+            zoom = parseFloat(window.localStorage.getItem(lsZoom));
+        } catch (e) {
+            console.error(e);
+            zoom = 1.0;
+        }
+    }
+
+    $('#zoomInput').on('input', (e) => {
+        zoom = parseFloat($(e.target).val());
+        $('main').css('font-size', zoom + 'px');
+        window.localStorage.setItem(lsZoom, zoom);
+    });
+
+    $('#zoomInput').val(zoom).trigger('input');
+
+    $('#fitWidth').click(e => {
+        let mainWidth = imageDim.width;
+        let visibleWidth = window.innerWidth;
+        console.log(mainWidth, visibleWidth);
+        $('#zoomInput').val(Math.max(0.25, Math.min(visibleWidth / mainWidth, 3))).trigger('input');
+    });
+
+    $('#fitHeight').click(e => {
+        let mainHeight = imageDim.height;
+        let visibleHeight = window.innerHeight - 54;//nav
+        console.log(mainHeight, visibleHeight);
+        $('#zoomInput').val(Math.max(0.25, Math.min(visibleHeight / mainHeight, 3))).trigger('input');
+    });
+
+    $('#fitScreen').click(e => {
+        let mainHeight = imageDim.height;
+        let visibleHeight = window.innerHeight - 54;//nav
+        let mainWidth = imageDim.width;
+        let visibleWidth = window.innerWidth;
+        $('#zoomInput').val(Math.max(0.25, Math.min(Math.min(visibleWidth / mainWidth, visibleHeight / mainHeight), 3))).trigger('input');
+    });
 
     //------------------------------------------------------------------------
 

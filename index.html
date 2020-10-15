@@ -71,12 +71,21 @@
                 <a class="btn btn-outline-info mr-3" data-toggle="modal" data-target="#changeSceneModal" title="Change Scene">
                     <i class="fas fa-images"></i>
                 </a>
+                <div class="mr-3">
+                    <input type="range" class="form-range" min="0.25" max="3" step="0.0005" id="zoomInput" title="Zoom">
+                </div>
+                <a class="btn btn-outline-info mr-3" title="Fit To Height" id="fitHeight">
+                    <i class="fas fa-arrows-alt-v"></i>
+                </a>
+                <a class="btn btn-outline-info mr-3" title="Fit To Width" id="fitWidth">
+                    <i class="fas fa-arrows-alt-h"></i>
+                </a>
+                <a class="btn btn-outline-info mr-3" title="Fit To Screen" id="fitScreen">
+                    <i class="fas fa-arrows-alt"></i>
+                </a>
                 <a class="btn btn-outline-info mr-3" data-toggle="modal" data-target="#helpModal" title="Help">
                     <i class="fas fa-question"></i>
                 </a>
-                <div>
-                    <input type="range" class="form-range" min="0.25" max="3" step="0.025" id="zoomInput" title="Zoom">
-                </div>
             </form>
         </div>
     </nav>
