@@ -18,14 +18,13 @@ $(window).ready(async () => {
         zoom = parseFloat(window.localStorage.getItem(lsZoom));
     }
 
-    $('main').css('font-size', zoom + 'px');
-    $('#zoomInput').val(zoom);
-
-    $('#zoomInput').change((e) => {
+    $('#zoomInput').on('input', (e) => {
         zoom = parseFloat($(e.target).val());
         $('main').css('font-size', zoom + 'px');
         window.localStorage.setItem(lsZoom, zoom);
     });
+
+    $('#zoomInput').val(zoom).trigger('input');
 
     if (window.localStorage.getItem(lsShownHelp) != lsShownHelp) {
         let el = document.getElementById('helpModal');
@@ -501,7 +500,7 @@ $(window).ready(async () => {
         }
 
         // reset the zoom to 1.0 and disable all other functionality
-        $('#zoomInput').val(1.0).change();
+        $('#zoomInput').val(1.0).trigger('input');
         $('[data-toggle="modal"][data-target="#addTokenModal"]').hide();
         $('[data-toggle="modal"][data-target="#changeImageModal"]').hide();
         $('[data-toggle="modal"][data-target="#changeSceneModal"]').hide();
