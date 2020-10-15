@@ -210,9 +210,12 @@ $(window).ready(async () => {
         $('#my-icon-select .icon img[icon-value=""]').parent('.icon').click();
     })
 
+    let addingToken = false;
     $('#addTokenForm').submit(async (e) => {
 
         e.preventDefault();
+
+        if (addingToken) return;
 
         let label = $('#addTokenModal form #tokenLabelInput').val();
         let colour = $('#addTokenModal form #tokenColourInput').val();
@@ -227,6 +230,9 @@ $(window).ready(async () => {
         let imageAttachmentName = "";
         let image = "";
 
+        addingToken = true;
+        $('#addingTokenSpinner').show();
+
         if ($('#my-icon-select .icon.selected img').attr('icon-value').length > 0) {
             colour = "#00000000";
             imageAttachmentName = $('#my-icon-select .icon.selected img').attr('icon-value');
@@ -235,6 +241,8 @@ $(window).ready(async () => {
             image = await getUploadedFileContentsAsURL($('#addTokenModal form #tokenImageFile'));
             if (!isFileImage(image)) {
                 alert("Filetype not supported.");
+                addingToken = false;
+                $('#addingTokenSpinner').hide();
                 return false;
             }
             let imageType = image.split(';')[0].split(':')[1];
@@ -267,9 +275,14 @@ $(window).ready(async () => {
             $(main).append(getTokenMarkup(token, image));
 
         }
+
         let modal = bootstrap.Modal.getInstance(addTokenModal);
         await modal.hide();
         await saveChangesToDB();
+
+        addingToken = false;
+        $('#addingTokenSpinner').hide();
+
     });
 
     $('#addTokenModal form #tokenImageFile').change((e) => {
@@ -297,36 +310,43 @@ $(window).ready(async () => {
         }
     });
 
+    let changingImage = false;
     $('#changeImageForm').submit(async (e) => {
 
         e.preventDefault();
 
-        try {
-            let file = $('#changeImageModal form #changeImageFile').val();
-            if (file.trim() == '') {
-                return false;
-            }
-            let image = await getUploadedFileContentsAsURL($('#changeImageModal form #changeImageFile'));
-            if (!isFileImage(image)) {
-                alert("Filetype not supported.");
-                return false;
-            }
-            let imageName = uuidv4();
-            let imageType = image.split(';')[0].split(':')[1];
-            let imageData = image.split(';')[1].split(',')[1];
-            mapImageDocument = await db.get(mapImageDocumentName);
-            await db.putAttachment(mapImageDocumentName, imageName, mapImageDocument._rev, imageData, imageType);
-            mapImageDocument = await db.get(mapImageDocumentName);
-            scene = await db.get(scene._id);
-            scene.background_zoom = 1;
-            scene.background = imageName;
-            await db.put(scene);
-            scene = await db.get(scene._id);
-            await saveChangesToDB();
-            location.reload();
-        } catch (e) {
-            alert(e.message);
+        if (changingImage) return;
+
+        let file = $('#changeImageModal form #changeImageFile').val();
+        if (file.trim() == '') {
+            return false;
         }
+
+        changingImage = true;
+        $('#changingImageSpinner').show();
+
+        let image = await getUploadedFileContentsAsURL($('#changeImageModal form #changeImageFile'));
+        if (!isFileImage(image)) {
+            alert("Filetype not supported.");
+            changingImage = false;
+            $('#changingImageSpinner').hide();
+            return false;
+        }
+
+        let imageName = uuidv4();
+        let imageType = image.split(';')[0].split(':')[1];
+        let imageData = image.split(';')[1].split(',')[1];
+        mapImageDocument = await db.get(mapImageDocumentName);
+        await db.putAttachment(mapImageDocumentName, imageName, mapImageDocument._rev, imageData, imageType);
+        mapImageDocument = await db.get(mapImageDocumentName);
+        scene = await db.get(scene._id);
+        scene.background_zoom = 1;
+        scene.background = imageName;
+        await db.put(scene);
+        scene = await db.get(scene._id);
+        await saveChangesToDB();
+        location.reload();
+
     });
 
     let changeSceneModal = document.getElementById('changeSceneModal');
@@ -345,68 +365,73 @@ $(window).ready(async () => {
         }
     });
 
+    let newingScening = false;
     $('#newSceneForm').submit(async (e) => {
 
         e.preventDefault();
 
-        try {
-            let name = $('#changeSceneModal #newSceneNameInput').val().trim();
-            let file = $('#changeSceneModal #newImageFile').val();
+        if (newingScening) return;
 
-            let unit = $('#changeSceneModal #mapUnitInput').val() ||
-                $('#changeSceneModal #mapUnitInput').attr('placeholder');
-            let distance = $('#changeSceneModal #mapDistanceInput').val() ||
-                $('#changeSceneModal #mapDistanceInput').attr('placeholder');
+        let name = $('#changeSceneModal #newSceneNameInput').val().trim();
+        let file = $('#changeSceneModal #newImageFile').val();
 
-            if (file.trim() == '' || name.trim() == '' || unit.trim() == '' || distance.trim() == '') {
-                return false;
-            }
+        let unit = $('#changeSceneModal #mapUnitInput').val() ||
+            $('#changeSceneModal #mapUnitInput').attr('placeholder');
+        let distance = $('#changeSceneModal #mapDistanceInput').val() ||
+            $('#changeSceneModal #mapDistanceInput').attr('placeholder');
 
-            let image = await getUploadedFileContentsAsURL($('#changeSceneModal #newImageFile'));
-            if (!isFileImage(image)) {
-                alert("Filetype not supported.");
-                return false;
-            }
-
-            if (name.startsWith('/')) {
-                alert("Remove the '/' at the start of the name.");
-                return;
-            }
-
-            if (name.endsWith('/')) {
-                alert("Remove the '/' at the end of the name.");
-                return;
-            }
-
-            let sceneId = `scene_` + name.replace(/[^[:alnum:]]/g, `-`).toLowerCase();
-            if (scenes.rows.some(s => s.id == sceneId)) {
-                alert(`'${name}' already exists`);
-                return false;
-            }
-
-            let imageName = uuidv4();
-            let imageType = image.split(';')[0].split(':')[1];
-            let imageData = image.split(';')[1].split(',')[1];
-            mapImageDocument = await db.get(mapImageDocumentName);
-            await db.putAttachment(mapImageDocumentName, imageName, mapImageDocument._rev, imageData, imageType);
-            mapImageDocument = await db.get(mapImageDocumentName);
-            scene = await db.get(scene._id);
-            await saveChangesToDB();
-            let newScene = {
-                _id: sceneId,
-                name: name,
-                background_zoom: 1,
-                background: imageName,
-                tokens: [],
-                unit: unit,
-                distance: distance
-            };
-            await db.put(newScene);
-            window.localStorage.setItem(lsSceneName, sceneId);
-            location.reload();
-        } catch (e) {
-            alert(e.message);
+        if (file.trim() == '' || name.trim() == '' || unit.trim() == '' || distance.trim() == '') {
+            return false;
         }
+
+        if (name.startsWith('/')) {
+            alert("Remove the '/' at the start of the name.");
+            return;
+        }
+
+        if (name.endsWith('/')) {
+            alert("Remove the '/' at the end of the name.");
+            return;
+        }
+
+        let sceneId = `scene_` + name.replace(/[^[:alnum:]]/g, `-`).toLowerCase();
+        if (scenes.rows.some(s => s.id == sceneId)) {
+            alert(`'${name}' already exists`);
+            return false;
+        }
+
+        newingScening = true;
+        $('#addingSceneSpinner').show();
+
+        let image = await getUploadedFileContentsAsURL($('#changeSceneModal #newImageFile'));
+        if (!isFileImage(image)) {
+            alert("Filetype not supported.");
+            newingScening = false;
+            $('#addingSceneSpinner').hide();
+            return false;
+        }
+
+        let imageName = uuidv4();
+        let imageType = image.split(';')[0].split(':')[1];
+        let imageData = image.split(';')[1].split(',')[1];
+        mapImageDocument = await db.get(mapImageDocumentName);
+        await db.putAttachment(mapImageDocumentName, imageName, mapImageDocument._rev, imageData, imageType);
+        mapImageDocument = await db.get(mapImageDocumentName);
+        scene = await db.get(scene._id);
+        await saveChangesToDB();
+        let newScene = {
+            _id: sceneId,
+            name: name,
+            background_zoom: 1,
+            background: imageName,
+            tokens: [],
+            unit: unit,
+            distance: distance
+        };
+        await db.put(newScene);
+        window.localStorage.setItem(lsSceneName, sceneId);
+        location.reload();
+
     });
 
     $('#changeSceneForm').submit(async (e) => {
