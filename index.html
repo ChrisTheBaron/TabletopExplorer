@@ -230,8 +230,16 @@
                     <hr />
 
                     <form autocomplete="off" id="newSceneForm">
+
                         <div class="row mb-3">
-                            <label for="tokenColourInput" class="col-sm-3 col-form-label">New Scene</label>
+                            <label for="newSceneFolderInput" class="col-sm-3 col-form-label">Folder</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="newSceneFolderInput">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="newSceneNameInput" class="col-sm-3 col-form-label">Name</label>
                             <div class="col-sm-9">
                                 <input required type="text" class="form-control" id="newSceneNameInput" placeholder="Tavern">
                             </div>
@@ -631,8 +639,8 @@
     <script src="./lib/iconselect.js-1.0/lib/control/iconselect.js"></script>
     <script src="./lib/iconselect.js-1.0/lib/iscroll.js"></script>
 
-    <script src="./tokenNameTypeahead.js"></script>
     <script src="./main.js"></script>
+    <script src="./tokenNameTypeahead.js"></script>
 
 </body>
 </html>

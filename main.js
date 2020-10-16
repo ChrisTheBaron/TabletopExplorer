@@ -128,33 +128,52 @@ $(window).ready(async () => {
 
     }
 
+    //------------------------------------------------------------------------
+    // Scenes
+
     let scenes = await db.allDocs({ include_docs: true });
+
     let availableScenes = [];
     for (let s of scenes.rows) {
-        if (s.id == mapImageDocumentName ||
-            s.id == tokenImageDocumentName ||
-            s.id == sceneName) {
-            continue;
-        }
         availableScenes.push(s);
     }
 
     let scenesGrouped = groupBy(availableScenes, (s) => {
-        return s.doc.name.includes('/') ? s.doc.name.split('/')[0].trim() : "Uncategorised";
+        return s.doc.folder || "";
     })
 
     for (let group in scenesGrouped) {
         let options = "";
         for (let option of scenesGrouped[group]) {
-            if (option.doc.name.includes('/')) {
-                options += `<option id="${option.id}">${option.doc.name.substring(option.doc.name.indexOf('/') + 1).trim()}</option>`;
+            if (option.id == mapImageDocumentName ||
+                option.id == tokenImageDocumentName ||
+                option.id == sceneName) {
+                continue;
+            }
+            options += `<option id="${option.id}">${option.doc.name}</option>`;
+        }
+        if (options != "") {
+            if (group != "") {
+                $('#sceneSelectInput').append(`<optgroup label="${group}">${options}</optgroup>`);
+                $('#removeSceneInput').append(`<optgroup label="${group}">${options}</optgroup>`);
             } else {
-                options += `<option id="${option.id}">${option.doc.name}</option>`;
+                $('#sceneSelectInput').append(`${options}`);
+                $('#removeSceneInput').append(`${options}`);
             }
         }
-        $('#sceneSelectInput').append(`<optgroup label="${group}">${options}</optgroup>`);
-        $('#removeSceneInput').append(`<optgroup label="${group}">${options}</optgroup>`);
     }
+
+    $('#newSceneFolderInput').typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 0
+    },
+        {
+            name: 'folders',
+            source: substringMatcher(Object.keys(scenesGrouped))
+        });
+
+    //------------------------------------------------------------------------
 
     // used for the distance moved thang
     let startPosition;
@@ -447,6 +466,7 @@ $(window).ready(async () => {
         if (newingScening) return;
 
         let name = $('#changeSceneModal #newSceneNameInput').val().trim();
+        let folder = $('#changeSceneModal #newSceneFolderInput').val().trim();
         let file = $('#changeSceneModal #newImageFile').val();
 
         let unit = $('#changeSceneModal #mapUnitInput').val() ||
@@ -458,17 +478,7 @@ $(window).ready(async () => {
             return false;
         }
 
-        if (name.startsWith('/')) {
-            alert("Remove the '/' at the start of the name.");
-            return;
-        }
-
-        if (name.endsWith('/')) {
-            alert("Remove the '/' at the end of the name.");
-            return;
-        }
-
-        let sceneId = `scene_` + name.replace(/[^[:alnum:]]/g, `-`).toLowerCase();
+        let sceneId = `scene_` + folder.toLowerCase() + '_' + name.toLowerCase();
         if (scenes.rows.some(s => s.id == sceneId)) {
             alert(`'${name}' already exists`);
             return false;
@@ -496,6 +506,7 @@ $(window).ready(async () => {
         let newScene = {
             _id: sceneId,
             name: name,
+            folder: folder,
             background_zoom: 1,
             background: imageName,
             tokens: [],
@@ -873,6 +884,28 @@ $(window).ready(async () => {
     }
 
 });
+
+function substringMatcher(strs) {
+    return function findMatches(q, cb) {
+        var matches, substringRegex;
+
+        // an array that will be populated with substring matches
+        matches = [];
+
+        // regex used to determine if a string contains the substring `q`
+        substrRegex = new RegExp(q, 'i');
+
+        // iterate through the pool of strings and for any string that
+        // contains the substring `q`, add it to the `matches` array
+        $.each(strs, function (i, str) {
+            if (substrRegex.test(str)) {
+                matches.push(str);
+            }
+        });
+
+        cb(matches);
+    };
+};
 
 https://stackoverflow.com/a/34890276
 function groupBy(xs, key) {
