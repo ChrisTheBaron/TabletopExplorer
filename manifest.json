@@ -2,8 +2,8 @@
   "name": "Tabletop Explorer",
   "short_name": "Tabletop Explorer",
   "lang": "en-GB",
-  "start_url": "http://tabletop-explorer.christhebaron.co.uk",
-  "display": "standalone",
+  "start_url": "https://tabletop-explorer.christhebaron.co.uk",
+  "display": "minimal-ui",
   "icons": [
     {
       "src": "/images/android-chrome-192x192.png",

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="./manifest.json">
 
     <link rel="apple-touch-icon" sizes="180x180" href="./images/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Tabletop Explorer">
     <meta name="apple-mobile-web-app-title" content="Tabletop Explorer">
-    <meta name="msapplication-starturl" content="http://tabletop-explorer.christhebaron.co.uk">
+    <meta name="msapplication-starturl" content="https://tabletop-explorer.christhebaron.co.uk">
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
@@ -116,7 +116,7 @@
                                 <input type="color" class="form-control form-control-color" id="tokenColourInput" title="Choose your color">
                             </div>
                             <div class="col-sm-2">
-                                <div id="my-icon-select"></div>
+                                <div id="my-icon-select" title="Recent Images"></div>
                             </div>
                             <div class="col-sm-6">
                                 <div class="form-file">
@@ -308,7 +308,7 @@
         <div class="modal-dialog modal-xl modal-fullscreen-sm-down">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="helpModalLabel">Tabletop Explorer</h5>
+                    <h5 class="modal-title" id="helpModalLabel">Help</h5>
                     <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -324,6 +324,10 @@
 
                             <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
                                 <div class="card-body">
+                                    <h1 class="display-4">Tabletop Explorer</h1>
+                                    <p>
+                                        <img src="./images/android-chrome-192x192.png" />
+                                    </p>
                                     <p>
                                         Welcome to Tabletop Explorer. A simple,
                                         game-agnostic tabletop map simulator.
@@ -340,6 +344,9 @@
                                         the
                                         <i class="fas fa-question text-info"></i>
                                         at the bottom of the screen.
+                                    </p>
+                                    <p>
+                                        <i class="fa fa-external-link-alt"></i> <a target="_blank" href="./LICENSE.txt">MIT License - Copyright (c) 2020 Chris Taylor</a>
                                     </p>
                                 </div>
                             </div>
@@ -383,6 +390,28 @@
                                         With this enabled, when you tap on a
                                         token it will be removed.
                                     </p>
+                                    <h3 class="h5">
+                                        Zooming
+                                    </h3>
+                                    <p>
+                                        Use the slider at the bottom of the
+                                        screen to adjust the zoom level. There
+                                        are also the following functions:
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            <i class="fas fa-arrows-alt-v text-info"></i>
+                                            Fit zoom to screen height
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-arrows-alt-h text-info"></i>
+                                            Fit zoom to screen width
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-arrows-alt text-info"></i>
+                                            Fit zoom to screen size
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -400,7 +429,7 @@
                                         Changing the Map
                                     </h3>
                                     <p>
-                                        Click <i class="fas fa-image text-info"></i>
+                                        Click <i class="fas fa-image text-warning"></i>
                                         to select a new background image for
                                         the current scene.
                                     </p>
@@ -408,7 +437,8 @@
                                         Resizing the Map
                                     </h3>
                                     <p>
-                                        Click <i class="fas fa-expand text-warning"></i>
+                                        Click <i class="fas fa-image text-warning"></i>
+                                        and then select 'Change Background Size'
                                         to start the process to resize the
                                         background image.
                                     </p>
@@ -422,9 +452,9 @@
                                             match your background image
                                         </li>
                                         <li>
-                                            Click <i class="fas fa-expand text-warning"></i>
-                                            again to resize the background
-                                            image to the correct size
+                                            Click <i class="fas fa-check text-success"></i>
+                                            to resize the background image to
+                                            the correct size
                                         </li>
                                     </ol>
                                     <h3 class="h5">
@@ -438,9 +468,8 @@
                                         saved.
                                     </p>
                                     <p>
-                                        You can use a <code>/</code> in the name
-                                        to organise the scenes into a simple
-                                        folder structure.
+                                        You can also organise your scenes into
+                                        a simple folder structure.
                                     </p>
                                     <h3 class="h5">
                                         Switching Scenes
@@ -586,12 +615,12 @@
                                     <div class="row">
                                         <div class="col-6">
                                             <button id="exportData" class="btn btn-block btn-success">
-                                                Export Data
+                                                Export Data as .zip
                                             </button>
                                         </div>
                                         <div class="col-6">
                                             <button id="importData" class="btn btn-block btn-warning">
-                                                Import Data
+                                                Import Data from .zip
                                             </button>
                                             <input type="file" id="importDataPicker" style="display:none" accept=".zip" />
                                         </div>
@@ -615,11 +644,11 @@
                                         Clicking the button below will clear
                                         <strong>all</strong> of your data.
                                         Don't click it unless you <em>really</em>
-                                        mean it.
+                                        mean it. Maybe try exporting it first?
                                     </p>
                                     <button id="clearAllData" class="btn btn-block btn-danger">
                                         <i class="fas fa-exclamation-triangle"></i>
-                                        Clear All Data. Warning, This Is Irreversible.
+                                        Clear All Data. This Is Irreversible.
                                         <i class="fas fa-exclamation-triangle"></i>
                                     </button>
                                 </div>

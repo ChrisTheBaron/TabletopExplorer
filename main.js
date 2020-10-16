@@ -163,15 +163,18 @@ $(window).ready(async () => {
         }
     }
 
-    $('#newSceneFolderInput').typeahead({
-        hint: true,
-        highlight: true,
-        minLength: 0
-    },
-        {
-            name: 'folders',
-            source: substringMatcher(Object.keys(scenesGrouped))
-        });
+    let folders = Object.keys(scenesGrouped).filter(x => x != "");
+    if (folders.length > 0) {
+        $('#newSceneFolderInput').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 0
+        },
+            {
+                name: 'folders',
+                source: substringMatcher(folders)
+            });
+    }
 
     //------------------------------------------------------------------------
 
