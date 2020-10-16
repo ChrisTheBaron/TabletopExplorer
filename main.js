@@ -387,15 +387,15 @@ $(window).ready(async () => {
         }
     });
 
-    let changeImageModal = document.getElementById('changeImageModal');
+    let editSceneModal = document.getElementById('editSceneModal');
 
-    changeImageModal.addEventListener('show.bs.modal', () => {
-        $('#changeImageModal form')[0].reset();
+    editSceneModal.addEventListener('show.bs.modal', () => {
+        $('#editSceneModal form')[0].reset();
         $('label[for="changeImageFile"]>.form-file-text').text('Choose file...');
     })
 
-    $('#changeImageModal form #changeImageFile').change((e) => {
-        let file = $('#changeImageModal form #changeImageFile').val();
+    $('#editSceneModal #changeImageFile').change((e) => {
+        let file = $('#editSceneModal #changeImageFile').val();
         if (file.includes('\\')) {
             $('label[for="changeImageFile"]>.form-file-text').text(file.split('\\').pop());
         } else {
@@ -410,7 +410,7 @@ $(window).ready(async () => {
 
         if (changingImage) return;
 
-        let file = $('#changeImageModal form #changeImageFile').val();
+        let file = $('#editSceneModal #changeImageFile').val();
         if (file.trim() == '') {
             return false;
         }
@@ -418,7 +418,7 @@ $(window).ready(async () => {
         changingImage = true;
         $('#changingImageSpinner').show();
 
-        let image = await getUploadedFileContentsAsURL($('#changeImageModal form #changeImageFile'));
+        let image = await getUploadedFileContentsAsURL($('#editSceneModal #changeImageFile'));
         if (!isFileImage(image)) {
             alert("Filetype not supported.");
             changingImage = false;
@@ -612,13 +612,15 @@ $(window).ready(async () => {
         // reset the zoom to 1.0 and disable all other functionality
         $('#zoomInput').val(1.0).trigger('input');
         $('[data-toggle="modal"][data-target="#addTokenModal"]').hide();
-        $('[data-toggle="modal"][data-target="#changeImageModal"]').hide();
+        $('[data-toggle="modal"][data-target="#editSceneModal"]').hide();
         $('[data-toggle="modal"][data-target="#changeSceneModal"]').hide();
         $('[data-toggle="modal"][data-target="#helpModal"]').hide();
         $('#removeTokens').hide();
         $('#zoomInput').hide();
         $('#removeTokensOuter').hide();
-        $('#setBackgroundSize').hide();
+
+        let editSceneModal = bootstrap.Modal.getInstance(document.getElementById('editSceneModal'))
+        await editSceneModal.hide();
 
         $('#acceptBackgroundSize').show();
         $('#cancelBackgroundSize').show();
