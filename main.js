@@ -529,7 +529,7 @@ $(window).ready(async () => {
             background: imageName,
             tokens: [],
             unit: unit,
-            distance: distance
+            distance: parseFloat(distance)
         };
         await db.put(newScene);
         window.localStorage.setItem(lsSceneName, sceneId);
@@ -870,25 +870,37 @@ $(window).ready(async () => {
         .attr('value', scene.name || "")
         .attr('placeholder', scene.name || "");
 
-    let renamingScene = false;
-    $('#renameScene').click(async e => {
+    $('#editMapDistanceInput')
+        .attr('value', scene.distance || "")
+        .attr('placeholder', scene.distance || "");
+    $('#editMapUnitInput')
+        .attr('value', scene.unit || "")
+        .attr('placeholder', scene.unit || "");
+
+    let editingScene = false;
+    $('#editSceneForm').submit(async e => {
 
         e.preventDefault();
 
-        if (renamingScene) return;
+        if (editingScene) return;
 
         let name = $('#editSceneModal #editSceneNameInput').val();
         let folder = $('#editSceneModal #editSceneFolderInput').val();
-        if (name.trim() == '') {
+        let distance = $('#editSceneModal #editMapDistanceInput').val();
+        let unit = $('#editSceneModal #editMapUnitInput').val();
+
+        if (name.trim() == '' || distance.trim() == '' || unit.trim() == '') {
             return;
         }
 
-        renamingScene = true;
-        $('#renamingScene').show();
+        editingScene = true;
+        $('#editingScene').show();
 
         await saveChangesToDB();
         scene.name = name;
         scene.folder = folder;
+        scene.distance = parseFloat(distance);
+        scene.unit = unit;
         await db.put(scene);
         location.reload();
 
