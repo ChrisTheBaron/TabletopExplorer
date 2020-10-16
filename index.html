@@ -49,39 +49,39 @@
     <nav class="navbar fixed-bottom navbar-dark bg-dark">
         <div class="container-fluid">
             <form class="d-flex align-items-center">
-                <a class="btn btn-outline-success mr-3" data-toggle="modal" data-target="#addTokenModal" title="Add Token">
+                <a class="btn btn-outline-success mr-3 control" data-toggle="modal" data-target="#addTokenModal" title="Add Token">
                     <i class="fas fa-plus"></i>
                 </a>
-                <div class="form-check form-switch mr-3" id="removeTokensOuter">
+                <div class="form-check form-switch mr-3 control">
                     <input class="form-check-input" type="checkbox" id="removeTokens">
                     <label class="form-check-label" for="removeTokens">Remove Tokens</label>
                 </div>
-                <a class="btn btn-outline-warning mr-3" data-toggle="modal" data-target="#editSceneModal" title="Edit Scene">
+                <a class="btn btn-outline-warning mr-3 control" data-toggle="modal" data-target="#editSceneModal" title="Edit Scene">
                     <i class="fas fa-image"></i>
+                </a>
+                <a class="btn btn-outline-info mr-3 control" data-toggle="modal" data-target="#changeSceneModal" title="Change Scene">
+                    <i class="fas fa-images"></i>
+                </a>
+                <div class="mr-3 control">
+                    <input type="range" class="form-range" min="0.25" max="3" step="0.0005" id="zoomInput" title="Zoom">
+                </div>
+                <a class="btn btn-outline-info mr-3 control" title="Fit To Height" id="fitHeight">
+                    <i class="fas fa-arrows-alt-v"></i>
+                </a>
+                <a class="btn btn-outline-info mr-3 control" title="Fit To Width" id="fitWidth">
+                    <i class="fas fa-arrows-alt-h"></i>
+                </a>
+                <a class="btn btn-outline-info mr-3 control" title="Fit To Screen" id="fitScreen">
+                    <i class="fas fa-arrows-alt"></i>
+                </a>
+                <a class="btn btn-outline-info mr-3 control" data-toggle="modal" data-target="#helpModal" title="Help">
+                    <i class="fas fa-question"></i>
                 </a>
                 <a class="btn btn-outline-success mr-3" title="Accept" id="acceptBackgroundSize" style="display:none;">
                     <i class="fas fa-check"></i>
                 </a>
                 <a class="btn btn-outline-danger mr-3" title="Cancel" id="cancelBackgroundSize" style="display:none;">
                     <i class="fas fa-times"></i>
-                </a>
-                <a class="btn btn-outline-info mr-3" data-toggle="modal" data-target="#changeSceneModal" title="Change Scene">
-                    <i class="fas fa-images"></i>
-                </a>
-                <div class="mr-3">
-                    <input type="range" class="form-range" min="0.25" max="3" step="0.0005" id="zoomInput" title="Zoom">
-                </div>
-                <a class="btn btn-outline-info mr-3" title="Fit To Height" id="fitHeight">
-                    <i class="fas fa-arrows-alt-v"></i>
-                </a>
-                <a class="btn btn-outline-info mr-3" title="Fit To Width" id="fitWidth">
-                    <i class="fas fa-arrows-alt-h"></i>
-                </a>
-                <a class="btn btn-outline-info mr-3" title="Fit To Screen" id="fitScreen">
-                    <i class="fas fa-arrows-alt"></i>
-                </a>
-                <a class="btn btn-outline-info mr-3" data-toggle="modal" data-target="#helpModal" title="Help">
-                    <i class="fas fa-question"></i>
                 </a>
             </form>
         </div>

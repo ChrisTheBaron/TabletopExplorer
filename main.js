@@ -611,13 +611,7 @@ $(window).ready(async () => {
 
         // reset the zoom to 1.0 and disable all other functionality
         $('#zoomInput').val(1.0).trigger('input');
-        $('[data-toggle="modal"][data-target="#addTokenModal"]').hide();
-        $('[data-toggle="modal"][data-target="#editSceneModal"]').hide();
-        $('[data-toggle="modal"][data-target="#changeSceneModal"]').hide();
-        $('[data-toggle="modal"][data-target="#helpModal"]').hide();
-        $('#removeTokens').hide();
-        $('#zoomInput').hide();
-        $('#removeTokensOuter').hide();
+        $('nav .control').hide();
 
         let editSceneModal = bootstrap.Modal.getInstance(document.getElementById('editSceneModal'))
         await editSceneModal.hide();
