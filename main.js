@@ -1,3 +1,5 @@
+const navBarHeight = 54;
+
 const gridSize = 50;
 const tokenBufferZoom = 0.8;// how much smaller the token should be to the grid
 const defaultSceneName = 'scene_default';
@@ -40,6 +42,8 @@ $(window).ready(async () => {
     main.style.height = `${imageDim.height}em`;
     main.style.width = `${imageDim.width}em`;
 
+    $('title').text(`${scene.name} - Tabletop Explorer`);
+
     //------------------------------------------------------------------------
     // Zooming
 
@@ -70,20 +74,21 @@ $(window).ready(async () => {
 
     $('#fitHeight').click(e => {
         let mainHeight = imageDim.height;
-        let visibleHeight = window.innerHeight - 54;//nav
+        let visibleHeight = window.innerHeight - navBarHeight;//nav
         console.log(mainHeight, visibleHeight);
         $('#zoomInput').val(Math.max(0.25, Math.min(visibleHeight / mainHeight, 3))).trigger('input');
     });
 
     $('#fitScreen').click(e => {
         let mainHeight = imageDim.height;
-        let visibleHeight = window.innerHeight - 54;//nav
+        let visibleHeight = window.innerHeight - navBarHeight;//nav
         let mainWidth = imageDim.width;
         let visibleWidth = window.innerWidth;
         $('#zoomInput').val(Math.max(0.25, Math.min(Math.min(visibleWidth / mainWidth, visibleHeight / mainHeight), 3))).trigger('input');
     });
 
     //------------------------------------------------------------------------
+    // Icon select
 
     IconSelect.COMPONENT_ICON_FILE_PATH = './lib/iconselect.js-1.0/images/control/icon-select/arrow.png';
 
@@ -110,6 +115,7 @@ $(window).ready(async () => {
     iconSelect.refresh(icons);
 
     //------------------------------------------------------------------------
+    // Tokens
 
     for (let token of scene.tokens) {
         // check for ones that are out of bounds, 
@@ -166,6 +172,15 @@ $(window).ready(async () => {
     let folders = Object.keys(scenesGrouped).filter(x => x != "");
     if (folders.length > 0) {
         $('#newSceneFolderInput').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 0
+        },
+            {
+                name: 'folders',
+                source: substringMatcher(folders)
+            });
+        $('#editSceneFolderInput').typeahead({
             hint: true,
             highlight: true,
             minLength: 0
@@ -844,6 +859,42 @@ $(window).ready(async () => {
         download(z, "tabletop-explorer.zip");
 
     });
+
+    //------------------------------------------------------------------------
+    // Renaming Scene
+
+    $('#editSceneFolderInput')
+        .attr('value', scene.folder || "")
+        .attr('placeholder', scene.folder || "");
+    $('#editSceneNameInput')
+        .attr('value', scene.name || "")
+        .attr('placeholder', scene.name || "");
+
+    let renamingScene = false;
+    $('#renameScene').click(async e => {
+
+        e.preventDefault();
+
+        if (renamingScene) return;
+
+        let name = $('#editSceneModal #editSceneNameInput').val();
+        let folder = $('#editSceneModal #editSceneFolderInput').val();
+        if (name.trim() == '') {
+            return;
+        }
+
+        renamingScene = true;
+        $('#renamingScene').show();
+
+        await saveChangesToDB();
+        scene.name = name;
+        scene.folder = folder;
+        await db.put(scene);
+        location.reload();
+
+    });
+
+    //------------------------------------------------------------------------
 
     function getCentreOfMapOnDisplay() {
 
