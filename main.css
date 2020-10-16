@@ -31,45 +31,45 @@ nav {
     position: absolute; /*so they don't stack*/
 }
 
-    .draggable .image {
-        width: 100%;
-        height: 100%;
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position-x: center;
-        background-position-y: top;
-    }
+.token .image {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: top;
+}
 
-    .draggable::after, .resize-drag::after {
-        font-size: 12px;
-        display: inline-block;
-        content: attr(data-l);
-        position: absolute;
-        text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-        text-align: center;
-        width: 600%;
-        left: -250%;
-    }
+.token.draggable::after, .resize-drag::after {
+    font-size: 12px;
+    display: inline-block;
+    content: attr(data-l);
+    position: absolute;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    text-align: center;
+    width: 600%;
+    left: -250%;
+}
 
-    .draggable::after {
-        bottom: -20px;
-    }
+.token::after {
+    bottom: -20px;
+}
 
 .resize-drag::after {
     top: calc(50% - 10px);
 }
 
-.draggable.no-image {
+.token.no-image {
     border-radius: 50%;
 }
 
-    .draggable.no-image::before {
+    .token.no-image::before {
         bottom: 25px;
     }
 
-    .draggable.no-image.dragging {
-        box-shadow: rgba(0, 0, 0, 0.75) 0px 0px 20px 0px;
-    }
+.draggable.no-image.dragging {
+    box-shadow: rgba(0, 0, 0, 0.75) 0px 0px 20px 0px;
+}
 
 .draggable[data-r="0"] .image {
     transform: rotate(0deg);

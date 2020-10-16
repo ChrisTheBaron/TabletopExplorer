@@ -46,7 +46,7 @@
 
     <main id="main">
 
-        <div id="dragMarker" style="display: none; "></div>
+        <div id="dragMarker" style="display: none;"></div>
         <span id="distanceMoved" style="display:none;"></span>
 
     </main>
@@ -54,9 +54,16 @@
     <nav class="navbar fixed-bottom navbar-dark bg-dark">
         <div class="container-fluid">
             <form class="d-flex align-items-center">
-                <a class="btn btn-outline-success mr-3 control" data-toggle="modal" data-target="#addTokenModal" title="Add Token">
-                    <i class="fas fa-plus"></i>
-                </a>
+
+                <div class="btn-group mr-3 control" role="group" aria-label="Add Tokens">
+                    <a class="btn btn-outline-success" data-toggle="modal" data-target="#addTokenModal" title="Add New Token">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                    <a class="btn btn-outline-success" data-toggle="modal" data-target="#addFavouritesTokenModal" title="Add Favourite Token">
+                        <i class="fas fa-bookmark"></i>
+                    </a>
+                </div>
+
                 <div class="form-check form-switch mr-3 control">
                     <input class="form-check-input" type="checkbox" id="removeTokens">
                     <label class="form-check-label" for="removeTokens">Remove Tokens</label>
@@ -70,15 +77,19 @@
                 <div class="mr-3 control">
                     <input type="range" class="form-range" min="0.25" max="3" step="0.0005" id="zoomInput" title="Zoom">
                 </div>
-                <a class="btn btn-outline-info mr-3 control" title="Fit To Height" id="fitHeight">
-                    <i class="fas fa-arrows-alt-v"></i>
-                </a>
-                <a class="btn btn-outline-info mr-3 control" title="Fit To Width" id="fitWidth">
-                    <i class="fas fa-arrows-alt-h"></i>
-                </a>
-                <a class="btn btn-outline-info mr-3 control" title="Fit To Screen" id="fitScreen">
-                    <i class="fas fa-arrows-alt"></i>
-                </a>
+
+                <div class="btn-group mr-3 control" role="group" aria-label="Set Zoom">
+                    <a class="btn btn-outline-info" title="Fit To Height" id="fitHeight">
+                        <i class="fas fa-arrows-alt-v"></i>
+                    </a>
+                    <a class="btn btn-outline-info" title="Fit To Width" id="fitWidth">
+                        <i class="fas fa-arrows-alt-h"></i>
+                    </a>
+                    <a class="btn btn-outline-info" title="Fit To Screen" id="fitScreen">
+                        <i class="fas fa-arrows-alt"></i>
+                    </a>
+                </div>
+
                 <a class="btn btn-outline-info mr-3 control" data-toggle="modal" data-target="#helpModal" title="Help">
                     <i class="fas fa-question"></i>
                 </a>
@@ -159,10 +170,54 @@
                             </div>
                         </div>
 
+                        <div class="row mb-3">
+                            <div class="col-sm">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="addToFavourites">
+                                    <label class="form-check-label" for="addToFavourites">
+                                        Save to Favourites
+                                    </label>
+                                </div>
+                                <p class="form-text">
+                                    This allows you to quickly add PC and NPC's
+                                    to other scenes without needing to fill in
+                                    the form every time. Only works with single
+                                    tokens.
+                                </p>
+                            </div>
+                        </div>
+
                         <div class="text-right">
                             <button type="submit" class="btn btn-success" id="addToken">
                                 <span style="display:none;" id="addingTokenSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                 Add Token
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addFavouritesTokenModal" tabindex="-1" aria-labelledby="addFavouritesTokenModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addFavouritesTokenModalLabel">Add Favourite Tokens</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form autocomplete="off" id="addFavouritesTokenForm">
+
+                        <div id="favouriteTokens">
+
+                        </div>
+
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-success" id="addToken">
+                                <span style="display:none;" id="addingFavouritesTokenSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                Add Tokens
                             </button>
                         </div>
 
@@ -428,6 +483,15 @@
                                         the current scene. You can also
                                         specify a colour or an image to be used
                                         for the tokens.
+                                    </p>
+                                    <p>
+                                        Click <i class="fas fa-bookmark text-success"></i>
+                                        to bring up the 'Add Favourite Tokens'
+                                        window. From here you can quickly add
+                                        any tokens that you marked as a
+                                        favourite when you added it the first
+                                        time. Use this for PC's and NPC's that
+                                        might appear on multiple scenes.
                                     </p>
                                     <h3 class="h5">
                                         Removing Tokens

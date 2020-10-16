@@ -12,6 +12,7 @@ const lsZoom = 'zoom';
 
 const tokenImageDocumentName = "tokens";
 const mapImageDocumentName = "maps";
+const favouriteTokensDocumentName = "favourite_tokens";
 
 $(window).ready(async () => {
 
@@ -30,6 +31,7 @@ $(window).ready(async () => {
     }
 
     let tokenImageDoc = await db.get(tokenImageDocumentName, { attachments: true });
+    let favouriteTokens = await db.get(favouriteTokensDocumentName);
 
     let scene = await db.get(sceneName);
     let imageAtt = await db.getAttachment(mapImageDocumentName, scene.background);
@@ -135,6 +137,72 @@ $(window).ready(async () => {
     }
 
     //------------------------------------------------------------------------
+    // Favourites Tokens
+
+    async function listFavourites() {
+
+        $('#favouriteTokens').html('');
+
+        if (favouriteTokens.tokens.length == 0) {
+
+            $('#favouriteTokens').append(`<p class="form-text">
+                You can mark tokens as favourites when adding them from scratch.
+            </p>`);
+
+        }
+
+        for (let i in favouriteTokens.tokens) {
+
+            let imageUrl = "";
+            if (favouriteTokens.tokens[i].b && favouriteTokens.tokens[i].b.trim().length > 0) {
+                let tokenAtt = await db.getAttachment(tokenImageDocumentName, favouriteTokens.tokens[i].b);
+                imageUrl = URL.createObjectURL(tokenAtt);
+            }
+
+            let token = `<div class="token ${(imageUrl.length > 0 ? "" : "no-image")}" 
+                style="
+                    display: inline-block;
+                    background-color: ${favouriteTokens.tokens[i].f || '#00000000'};
+                    width: ${favouriteTokens.tokens[i].s || 1}px;
+                    height: ${favouriteTokens.tokens[i].s || 1}px;
+                ">
+                ${(imageUrl.length > 0 ? `<div class="image" style="
+                    background-image: url('${imageUrl}');
+                "></div>` : "")}</div>`
+
+            $('#favouriteTokens').append(`${token}<div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" value="" id="fav-${i}">
+                  <label class="form-check-label" for="fav-${i}">
+                    ${favouriteTokens.tokens[i].l}
+                  </label>
+                  <a class="btn btn-danger btn-sm float-right removeFavourite" id="fav-${i}"><i class="far fa-trash-alt"></i></a>
+                </div><hr/>`);
+
+        }
+
+    }
+
+    await listFavourites();
+
+    $('#favouriteTokens').click('.removeFavourite', async e => {
+
+        if (!$(e.target).is('.removeFavourite')) return;
+
+        e.preventDefault();
+
+        let ind = parseInt($(e.target).attr('id').split('-').pop());
+
+        if (!confirm(`Are you sure you want to unfavourite '${favouriteTokens.tokens[ind].l}'?`)) return;
+
+        favouriteTokens.tokens.splice(ind, 1);
+        await db.put(favouriteTokens);
+        favouriteTokens = await db.get(favouriteTokensDocumentName);
+
+        await listFavourites();
+
+    });
+
+    //------------------------------------------------------------------------
     // Scenes
 
     let scenes = await db.allDocs({ include_docs: true });
@@ -153,6 +221,7 @@ $(window).ready(async () => {
         for (let option of scenesGrouped[group]) {
             if (option.id == mapImageDocumentName ||
                 option.id == tokenImageDocumentName ||
+                option.id == favouriteTokensDocumentName ||
                 option.id == sceneName) {
                 continue;
             }
@@ -292,6 +361,78 @@ $(window).ready(async () => {
         };
     });
 
+    let addFavouritesTokenModal = document.getElementById('addFavouritesTokenModal');
+
+    addFavouritesTokenModal.addEventListener('show.bs.modal', () => {
+        $('#addFavouritesTokenForm')[0].reset();
+    })
+
+    let addingFavouritesToken = false;
+    $('#addFavouritesTokenForm').submit(async (e) => {
+
+        e.preventDefault();
+
+        if (addingFavouritesToken) return;
+
+        let ticked = $('#addFavouritesTokenModal #favouriteTokens input[type="checkbox"]:checked');
+
+        if (ticked.length == 0) return;
+
+        addingFavouritesToken = true;
+        $('#addingFavouritesTokenSpinner').show();
+
+        let [x, y] = getCentreOfMapOnDisplay();
+
+        let squareLength = Math.ceil(Math.pow(ticked.length, 0.5));
+
+        let biggestSize = Math.max(...favouriteTokens.tokens.map(t => t.s));
+
+        let originX = x - (biggestSize * squareLength * 0.5 / tokenBufferZoom);
+        let originY = y - (biggestSize * squareLength * 0.5 / tokenBufferZoom);
+
+        let i = 0;
+
+        for (let t of $('#addFavouritesTokenModal #favouriteTokens input[type="checkbox"]:checked')) {
+
+            let ind = parseInt($(t).attr('id').split('-').pop());
+
+            let size = favouriteTokens.tokens[ind].s;
+            let label = favouriteTokens.tokens[ind].l;
+            let colour = favouriteTokens.tokens[ind].f;
+            let imageAttachmentName = favouriteTokens.tokens[ind].b;
+
+            let image = "";
+            if (imageAttachmentName && imageAttachmentName.trim().length > 0) {
+                let tokenAtt = await db.getAttachment(tokenImageDocumentName, imageAttachmentName);
+                image = URL.createObjectURL(tokenAtt);
+            }
+
+            let x = originX + ((i % squareLength) * size / tokenBufferZoom);
+            let y = originY + (Math.floor(i / squareLength) * size / tokenBufferZoom);
+
+            $(main).append(getTokenMarkup({
+                s: size,
+                x: x,
+                y: y,
+                b: imageAttachmentName,
+                f: colour,
+                l: label,
+                r: 0
+            }, image));
+
+            i++;
+
+        }
+
+        let modal = bootstrap.Modal.getInstance(addFavouritesTokenModal);
+        await modal.hide();
+        await saveChangesToDB();
+
+        addingFavouritesToken = false;
+        $('#addingFavouritesTokenSpinner').hide();
+
+    });
+
     let addTokenModal = document.getElementById('addTokenModal');
 
     addTokenModal.addEventListener('show.bs.modal', () => {
@@ -308,11 +449,12 @@ $(window).ready(async () => {
 
         if (addingToken) return;
 
-        let label = $('#addTokenModal form #tokenLabelInput').val();
-        let colour = $('#addTokenModal form #tokenColourInput').val();
-        let number = parseInt($('#addTokenModal form #tokenNumberInput').val());
+        let label = $('#addTokenModal #tokenLabelInput').val();
+        let colour = $('#addTokenModal #tokenColourInput').val();
+        let number = parseInt($('#addTokenModal #tokenNumberInput').val());
         let numbering = $('#tokenNumberingInput option:selected').val();
-        let size = parseInt($('#addTokenModal form #tokenSizeInput').val()) * gridSize * tokenBufferZoom;
+        let size = parseInt($('#addTokenModal #tokenSizeInput').val()) * gridSize * tokenBufferZoom;
+        let save = $('#addTokenModal #addToFavourites').is(':checked');
 
         if (label.trim() == '' || number < 1 || size < 1) {
             return false;
@@ -391,6 +533,18 @@ $(window).ready(async () => {
         await modal.hide();
         await saveChangesToDB();
 
+        if (save) {
+            favouriteTokens.tokens.push({
+                s: size,
+                b: imageAttachmentName,
+                f: colour,
+                l: label
+            });
+            await db.put(favouriteTokens);
+            favouriteTokens = await db.get(favouriteTokensDocumentName);
+            await listFavourites();
+        }
+
         addingToken = false;
         $('#addingTokenSpinner').hide();
 
@@ -406,7 +560,6 @@ $(window).ready(async () => {
     });
 
     let editSceneModal = document.getElementById('editSceneModal');
-
     editSceneModal.addEventListener('show.bs.modal', () => {
         $('#editSceneModal form')[0].reset();
         $('label[for="changeImageFile"]>.form-file-text').text('Choose file...');
@@ -819,7 +972,8 @@ $(window).ready(async () => {
 
         for (let i in newScenes.rows) {
             if (newScenes.rows[i].doc._id == mapImageDocumentName ||
-                newScenes.rows[i].doc._id == tokenImageDocumentName) {
+                newScenes.rows[i].doc._id == tokenImageDocumentName ||
+                newScenes.rows[i].doc._id == favouriteTokensDocumentName) {
                 continue;
             }
             window.localStorage.setItem(lsSceneName, newScenes.rows[i].doc._id);
@@ -1023,7 +1177,7 @@ function getImageDisplayDimensions(file, zoom) {
 }
 
 function getTokenMarkup(token, imageUrl) {
-    return `<div class="draggable ${(imageUrl.length > 0 ? "" : "no-image")}" 
+    return `<div class="draggable token ${(imageUrl.length > 0 ? "" : "no-image")}" 
             data-l="${token.l}" 
             data-x="${token.x || 10}"    
             data-y="${token.y || 10}" 
@@ -1049,6 +1203,12 @@ async function initDb() {
     if (entries.total_rows == 0) {
 
         let defaultSceneMapName = uuidv4();
+
+        let favouriteTokensDocument = {
+            _id: favouriteTokensDocumentName,
+            tokens: []
+        };
+        await db.put(favouriteTokensDocument);
 
         let mapImageDocument = {
             _id: mapImageDocumentName,
