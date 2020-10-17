@@ -209,16 +209,18 @@ $(window).ready(async () => {
 
     let availableScenes = [];
     for (let s of scenes.rows) {
-        availableScenes.push(s);
+        if (s.doc.name) availableScenes.push(s);
     }
 
     let scenesGrouped = groupBy(availableScenes, (s) => {
         return s.doc.folder || "";
-    })
+    });
 
-    for (let group in scenesGrouped) {
+    let folders = Object.keys(scenesGrouped).sort();
+
+    for (let folder of folders) {
         let options = "";
-        for (let option of scenesGrouped[group]) {
+        for (let option of scenesGrouped[folder].sort((a, b) => a.doc.name.localeCompare(b.doc.name))) {
             if (option.id == mapImageDocumentName ||
                 option.id == tokenImageDocumentName ||
                 option.id == favouriteTokensDocumentName ||
@@ -228,9 +230,9 @@ $(window).ready(async () => {
             options += `<option id="${option.id}">${option.doc.name}</option>`;
         }
         if (options != "") {
-            if (group != "") {
-                $('#sceneSelectInput').append(`<optgroup label="${group}">${options}</optgroup>`);
-                $('#removeSceneInput').append(`<optgroup label="${group}">${options}</optgroup>`);
+            if (folder != "") {
+                $('#sceneSelectInput').append(`<optgroup label="${folder}">${options}</optgroup>`);
+                $('#removeSceneInput').append(`<optgroup label="${folder}">${options}</optgroup>`);
             } else {
                 $('#sceneSelectInput').append(`${options}`);
                 $('#removeSceneInput').append(`${options}`);
@@ -238,7 +240,9 @@ $(window).ready(async () => {
         }
     }
 
-    let folders = Object.keys(scenesGrouped).filter(x => x != "");
+    // now just the proper folders
+    folders = folders.filter(x => x != "");
+
     if (folders.length > 0) {
         $('#newSceneFolderInput').typeahead({
             hint: true,
