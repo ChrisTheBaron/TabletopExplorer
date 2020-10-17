@@ -189,7 +189,7 @@
 
                         <div class="text-right">
                             <button type="submit" class="btn btn-success" id="addToken">
-                                <span style="display:none;" id="addingTokenSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                 Add Token
                             </button>
                         </div>
@@ -216,7 +216,7 @@
 
                         <div class="text-right">
                             <button type="submit" class="btn btn-success" id="addToken">
-                                <span style="display:none;" id="addingFavouritesTokenSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                 Add Tokens
                             </button>
                         </div>
@@ -256,7 +256,7 @@
                         </div>
                         <div class="text-right">
                             <button type="submit" class="btn btn-success" id="changeImage">
-                                <span style="display:none;" id="changingImageSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                 Change Image
                             </button>
                         </div>
@@ -296,7 +296,7 @@
 
                         <div class="text-right">
                             <button type="submit" class="btn btn-success" id="editScene">
-                                <span style="display:none;" id="editingScene" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                 Edit Scene
                             </button>
                         </div>
@@ -376,7 +376,7 @@
 
                         <div class="text-right">
                             <button type="submit" class="btn btn-success" id="newScene">
-                                <span style="display:none;" id="addingSceneSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                 New
                             </button>
                         </div>
@@ -726,11 +726,13 @@
                                     <div class="row">
                                         <div class="col-6">
                                             <button id="exportData" class="btn btn-block btn-success">
+                                                <span style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                                 Export Data as .zip
                                             </button>
                                         </div>
                                         <div class="col-6">
                                             <button id="importData" class="btn btn-block btn-warning">
+                                                <span style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                                 Import Data from .zip
                                             </button>
                                             <input type="file" id="importDataPicker" style="display:none" accept=".zip" />
@@ -758,6 +760,7 @@
                                         mean it. Maybe try exporting it first?
                                     </p>
                                     <button id="clearAllData" class="btn btn-block btn-danger">
+                                        <span style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                         <i class="fas fa-exclamation-triangle"></i>
                                         Clear All Data. This Is Irreversible.
                                         <i class="fas fa-exclamation-triangle"></i>

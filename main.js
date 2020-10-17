@@ -379,7 +379,7 @@ $(window).ready(async () => {
         if (ticked.length == 0) return;
 
         addingFavouritesToken = true;
-        $('#addingFavouritesTokenSpinner').show();
+        $('#addFavouritesTokenForm .spinner-border').show();
 
         let [x, y] = getCentreOfMapOnDisplay();
 
@@ -464,7 +464,7 @@ $(window).ready(async () => {
         let image = "";
 
         addingToken = true;
-        $('#addingTokenSpinner').show();
+        $('#addTokenForm .spinner-border').show();
 
         if ($('#my-icon-select .icon.selected img').attr('icon-value').length > 0) {
             colour = "#00000000";
@@ -587,7 +587,7 @@ $(window).ready(async () => {
         }
 
         changingImage = true;
-        $('#changingImageSpinner').show();
+        $('#changeImageForm .spinner-border').show();
 
         let image = await getUploadedFileContentsAsURL($('#editSceneModal #changeImageFile'));
         if (!isFileImage(image)) {
@@ -656,7 +656,7 @@ $(window).ready(async () => {
         }
 
         newingScening = true;
-        $('#addingSceneSpinner').show();
+        $('#newSceneForm .spinner-border').show();
 
         let image = await getUploadedFileContentsAsURL($('#changeSceneModal #newImageFile'));
         if (!isFileImage(image)) {
@@ -881,10 +881,15 @@ $(window).ready(async () => {
 
     });
 
+    let clearingAllData = false;
     $('#clearAllData').click(async () => {
+        if (clearingAllData) return;
         if (confirm("Are you sure?")) {
+            clearingAllData = true;
+            $('#clearAllData .spinner-border').show();
             await db.destroy();
             localStorage.clear();
+            $('#clearAllData .spinner-border').hide();
             alert("The page will now reload.");
             window.location.reload(true);
         }
@@ -896,7 +901,14 @@ $(window).ready(async () => {
         }
     });
 
+    let importingData = false;
     $('#importDataPicker').change(async () => {
+
+        if ($('#importDataPicker').val().trim() == '') return;
+
+        if (importingData) return;
+        importingData = true;
+        $('#importData .spinner-border').show();
 
         let newScenes;
         let zip;
@@ -914,7 +926,9 @@ $(window).ready(async () => {
         } catch (e) {
             console.error(e);
             alert("Import failed.")
-            return false;
+            importingData = false;
+            $('#importData .spinner-border').hide();
+            return;
         }
 
         // well no going back now
@@ -981,12 +995,18 @@ $(window).ready(async () => {
             break;
         }
 
+        $('#importData .spinner-border').hide();
         alert("Import complete. Page will now reload.");
         location.reload(true);
 
     });
 
+    let exportingData = false;
     $('#exportData').click(async () => {
+
+        if (exportingData) return;
+        exportingData = true;
+        $('#exportData .spinner-border').show();
 
         var zip = new JSZip();
 
@@ -1011,6 +1031,9 @@ $(window).ready(async () => {
         // Generate the zip file asynchronously
         let z = await zip.generateAsync({ type: "blob" })
         download(z, "tabletop-explorer.zip");
+
+        exportingData = false;
+        $('#exportData .spinner-border').hide();
 
     });
 
