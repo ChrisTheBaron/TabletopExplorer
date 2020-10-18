@@ -12,19 +12,23 @@ accounts to create.
 ## Features
 
 ![Moving Tokens](images/moving.gif)
+
 *Show off your carefully designed maps in all their glorious detail. You'll be
 able to effortlessly tell your characters exactly how far away their next fight
 is.*
 
 ![Adding Tokens](images/adding-tokens.gif)
+
 *Quickly add any number of tokens to the map, saving your PC's tokens so you 
 don't waste any time getting them into their next deadly encounter.*
 
 ![Adding New Scene](images/adding-scene.gif)
+
 *There's no limits to the places your characters can go, and no limits to the 
 number of maps you can have. Switch back and forth with ease.*
 
 ![Setting Map Scale](images/sizing.gif)
+
 *Painlessly set the scale of your map so you know your tokens will fit 
 perfectly.*
 
