@@ -2,7 +2,7 @@
   "name": "tabletop-explorer",
   "version": "1.0.0",
   "scripts": {
-    "build": "parcel build viewer/viewer.js",
+    "build": "parcel build src/*.js",
     "start": "npm run build && http-server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
