@@ -1,0 +1,474 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="../images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../images/favicon-16x16.png">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Tabletop Explorer">
+    <meta name="apple-mobile-web-app-title" content="Tabletop Explorer">
+    <meta name="msapplication-starturl" content="https://tabletop-explorer.christhebaron.co.uk">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+    <meta name="description" content="">
+
+    <title>Tabletop Explorer</title>
+
+    <link rel="stylesheet" href="../lib/bootstrap.min.css">
+    <link rel="stylesheet" href="../lib/fontawesome-free-5.15.1-web/css/all.min.css">
+
+    <link rel="stylesheet" href="../main.css">
+
+    <script src="../lib/modernizr.js"></script>
+    <script>
+        for (let i of Object.keys(Modernizr)) {
+            if (Modernizr[i] === false) {
+                location.replace("https://browsehappy.com/");
+            }
+        }
+    </script>
+
+</head>
+<body>
+
+    <div class="alert alert-warning d-md-none position-absolute" role="alert">
+        This application is best enjoyed on a screen wider than 768px.
+        <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <main id="main">
+
+    </main>
+
+    <nav class="navbar fixed-bottom navbar-dark bg-dark">
+        <div class="container-fluid">
+            <form class="d-flex align-items-center">
+
+                <div class="mr-3 control">
+                    <input type="range" class="form-range" min="0.25" max="3" step="0.0005" id="zoomInput" title="Zoom">
+                </div>
+
+                <div class="btn-group mr-3 control" role="group" aria-label="Set Zoom">
+                    <a class="btn btn-outline-info" title="Fit To Height" id="fitHeight">
+                        <i class="fas fa-arrows-alt-v"></i>
+                    </a>
+                    <a class="btn btn-outline-info" title="Fit To Width" id="fitWidth">
+                        <i class="fas fa-arrows-alt-h"></i>
+                    </a>
+                    <a class="btn btn-outline-info" title="Fit To Screen" id="fitScreen">
+                        <i class="fas fa-arrows-alt"></i>
+                    </a>
+                </div>
+
+                <a class="btn btn-outline-info mr-3 control" data-toggle="modal" data-target="#helpModal" title="Help">
+                    <i class="fas fa-question"></i>
+                </a>
+
+            </form>
+        </div>
+    </nav>
+
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-fullscreen-sm-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="helpModalLabel">Help</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="accordion" id="accordionExample">
+                        <div class="card">
+                            <div class="card-header p-0" id="headingOne">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-light btn-block text-left p-3 rounded-0" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                        Introduction
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <h1 class="display-4">Tabletop Explorer</h1>
+                                    <p>
+                                        <img src="../images/android-chrome-192x192.png" />
+                                    </p>
+                                    <p>
+                                        Welcome to Tabletop Explorer. A simple,
+                                        game-agnostic tabletop map simulator.
+                                        Optimised for Desktop and Tablets
+                                        (mobile coming soon). Everything is
+                                        stored in your browser, no internet
+                                        connection needed, no servers to
+                                        connect to, no accounts to create. Any
+                                        changes will be saved in your browser,
+                                        so everything will be here ready for
+                                        your next session.
+                                    </p>
+                                    <p>
+                                        See the sections below for more
+                                        information, or simply click the
+                                        <button type="button" class="btn-close"></button>
+                                        at the top to get straight into it. You
+                                        can always get back here by clicking
+                                        the
+                                        <i class="fas fa-question text-info"></i>
+                                        at the bottom of the screen.
+                                    </p>
+                                    <p>
+                                        <a href='https://ko-fi.com/christhebaron' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://cdn.ko-fi.com/cdn/kofi2.png?v=2' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+                                    </p>
+                                    <p>
+                                        <i class="fa fa-external-link-alt"></i> <a target="_blank" href="./LICENSE.txt">MIT License - Copyright (c) 2020 Chris Taylor</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header p-0" id="headingTwo">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-light btn-block text-left collapsed p-3 rounded-0" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                        Dealing With Tokens
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <h3 class="h5">
+                                        Moving Tokens
+                                    </h3>
+                                    <p>
+                                        Simply drag and drop the token anywhere
+                                        on the map to move it around. You can
+                                        also double tap the token to turn it
+                                        90&deg;.
+                                    </p>
+                                    <h3 class="h5">
+                                        Adding Tokens
+                                    </h3>
+                                    <p>
+                                        Click <i class="fas fa-plus text-success"></i>
+                                        to bring up the 'Add Token' window.
+                                        From here you can specify the label,
+                                        size and number of tokens to add to
+                                        the current scene. You can also
+                                        specify a colour or an image to be used
+                                        for the tokens.
+                                    </p>
+                                    <p>
+                                        Click <i class="fas fa-bookmark text-success"></i>
+                                        to bring up the 'Add Favourite Tokens'
+                                        window. From here you can quickly add
+                                        any tokens that you marked as a
+                                        favourite when you added it the first
+                                        time. Use this for PC's and NPC's that
+                                        might appear on multiple scenes.
+                                    </p>
+                                    <h3 class="h5">
+                                        Removing Tokens
+                                    </h3>
+                                    <p>
+                                        Click 'Remove Tokens' to change modes.
+                                        With this enabled, when you tap on a
+                                        token it will be removed.
+                                    </p>
+                                    <h3 class="h5">
+                                        Zooming
+                                    </h3>
+                                    <p>
+                                        Use the slider at the bottom of the
+                                        screen to adjust the zoom level. There
+                                        are also the following functions:
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            <i class="fas fa-arrows-alt-v text-info"></i>
+                                            Fit zoom to screen height
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-arrows-alt-h text-info"></i>
+                                            Fit zoom to screen width
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-arrows-alt text-info"></i>
+                                            Fit zoom to screen size
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header p-0" id="headingScenes">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-light btn-block text-left collapsed p-3 rounded-0" type="button" data-toggle="collapse" data-target="#collapseScenes" aria-expanded="false" aria-controls="collapseScenes">
+                                        Dealing With Scenes
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapseScenes" class="collapse" aria-labelledby="headingScenes" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <h3 class="h5">
+                                        Changing the Map
+                                    </h3>
+                                    <p>
+                                        Click <i class="fas fa-image text-warning"></i>
+                                        to select a new background image for
+                                        the current scene.
+                                    </p>
+                                    <h3 class="h5">
+                                        Resizing the Map
+                                    </h3>
+                                    <p>
+                                        Click <i class="fas fa-image text-warning"></i>
+                                        and then select 'Change Background Size'
+                                        to start the process to resize the
+                                        background image.
+                                    </p>
+                                    <ol>
+                                        <li>
+                                            Input the size of the reference
+                                            square
+                                        </li>
+                                        <li>
+                                            Adjust the size of the square to
+                                            match your background image
+                                        </li>
+                                        <li>
+                                            Click <i class="fas fa-check text-success"></i>
+                                            to resize the background image to
+                                            the correct size
+                                        </li>
+                                    </ol>
+                                    <h3 class="h5">
+                                        Adding new Scenes
+                                    </h3>
+                                    <p>
+                                        Click <i class="fas fa-images text-info"></i>
+                                        to add a new scene. You will need to
+                                        give it a name and select a background
+                                        image. Your current scene will be
+                                        saved.
+                                    </p>
+                                    <p>
+                                        You can also organise your scenes into
+                                        a simple folder structure.
+                                    </p>
+                                    <h3 class="h5">
+                                        Switching Scenes
+                                    </h3>
+                                    <p>
+                                        Click <i class="fas fa-images text-info"></i>
+                                        and select the scene you wish to switch
+                                        to. Your current scene will be saved.
+                                    </p>
+                                    <h3 class="h5">
+                                        Removing Scenes
+                                    </h3>
+                                    <p>
+                                        Click <i class="fas fa-images text-info"></i>
+                                        and select the scene you wish to
+                                        remove. You cannot remove the current
+                                        scene, you need to switch to a
+                                        different scene first.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header p-0" id="headingThree">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-light btn-block text-left collapsed p-3 rounded-0" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                        Credits
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <p>
+                                        Technologies Used
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://v5.getbootstrap.com/">
+                                                Bootstap 5
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://jquery.com/">
+                                                jQuery
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://pouchdb.com/">
+                                                PouchDB
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://twitter.github.io/typeahead.js/">
+                                                typeahead.js
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://fontawesome.com/">
+                                                Font Awesome
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://modernizr.com/">
+                                                Modernizr
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://github.com/uuidjs/uuid">
+                                                uuid
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://stuk.github.io/jszip/">
+                                                JSZip
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://github.com/rndme/download">
+                                                download
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://bug7a.github.io/iconselect.js/">
+                                                iconselect.js
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <p>
+                                        Acknowledgements
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            Logo designed at
+                                            <a target="_blank" href="https://logomakr.com/">
+                                                LogoMakr.com
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://www.deviantart.com/mike-perrotta/art/Dungeons-and-Dragons-Tiled-Tavern-Map-584588937">
+                                                Tavern map reproduced from 'Dungeons and Dragons - Tiled Tavern Map' by 'Mike-Perrotta'
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://imgur.com/a/iOCnr#0">
+                                                Tokens reproduced from 'Human and human-shaped characters'
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="https://dungeonsdragons.fandom.com/wiki/List_of_Dungeons_%26_Dragons_5th_edition_monsters">
+                                                List of Dungeons & Dragons 5th edition monsters
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <a target="_blank" href="http://dungeonsmaster.com/2012/10/lair-assault-map-gallery/">
+                                                Boat map reproduced from 'Lair Assault Map Gallery' on dungeonsmaster.com
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header p-0" id="headingExportImport">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-light btn-block text-left p-3 rounded-0" type="button" data-toggle="collapse" data-target="#collapseExportImport" aria-expanded="false" aria-controls="collapseExportImport">
+                                        Export/Import Data
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseExportImport" class="collapse" aria-labelledby="headingExportImport" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <button id="exportData" class="btn btn-block btn-success">
+                                                <span style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                Export Data as .zip
+                                            </button>
+                                        </div>
+                                        <div class="col-6">
+                                            <button id="importData" class="btn btn-block btn-warning">
+                                                <span style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                Import Data from .zip
+                                            </button>
+                                            <input type="file" id="importDataPicker" style="display:none" accept=".zip" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header p-0" id="headingNuke">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-light btn-block text-left p-3 rounded-0" type="button" data-toggle="collapse" data-target="#collapseNuke" aria-expanded="false" aria-controls="collapseNuke">
+                                        Clear Data
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseNuke" class="collapse" aria-labelledby="headingNuke" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <p>
+                                        Clicking the button below will clear
+                                        <strong>all</strong> of your data.
+                                        Don't click it unless you <em>really</em>
+                                        mean it. Maybe try exporting it first?
+                                    </p>
+                                    <button id="clearAllData" class="btn btn-block btn-danger">
+                                        <span style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Clear All Data. This Is Irreversible.
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../lib/bootstrap.bundle.min.js"></script>
+    <script src="../lib/jquery-3.5.1.min.js"></script>
+
+    <script src="../dist/viewer.js"></script>
+
+    <!--<script src="./src/constants.js"></script>
+    <script src="./src/db.js"></script>
+    <script src="./src/utils.js"></script>
+    <script src="./src/zoom.js"></script>
+    <script src="./src/iconsSelect.js"></script>
+    <script src="./src/importExport.js"></script>
+    <script src="./src/tokenNameTypeahead.js"></script>
+    <script src="./main.js"></script>-->
+
+</body>
+</html>
