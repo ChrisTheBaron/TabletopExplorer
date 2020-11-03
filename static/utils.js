@@ -37,6 +37,16 @@ function isFileImage(data) {
     }
 }
 
+async function blobToBase64(blob) {
+    return new Promise((resolve) => {
+        let reader = new FileReader();
+        reader.onload = function () {
+            resolve(reader.result);
+        };
+        reader.readAsDataURL(blob);
+    });
+};
+
 function getUploadedFileContentsAsURL(target) {
     return new Promise(function (resolved, rejected) {
         var files = $(target)[0].files;
@@ -76,6 +86,7 @@ function getImageDisplayDimensions(file, zoom) {
 
 function getTokenMarkup(token, imageUrl) {
     return `<div class="draggable token ${(imageUrl.length > 0 ? "" : "no-image")}" 
+            data-i="${token.i}"
             data-l="${token.l}" 
             data-x="${token.x || 10}"    
             data-y="${token.y || 10}" 
@@ -161,4 +172,12 @@ function getCentreOfMapOnDisplay(imageDim, zoom) {
 
     return [x, y];
 
+}
+
+function generateKey(length) {
+    const validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ2346789';
+    let array = new Uint8Array(length);
+    window.crypto.getRandomValues(array);
+    array = array.map(x => validChars.charCodeAt(x % validChars.length));
+    return String.fromCharCode.apply(null, array);
 }

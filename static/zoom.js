@@ -22,6 +22,11 @@ function InitZoom(imageDim) {
 
     $(window).ready(() => {
 
+        $('#zoomInput').off();
+        $('#fitWidth').off();
+        $('#fitHeight').off();
+        $('#fitScreen').off();
+
         $('#zoomInput').on('input', (e) => {
             SetZoom(parseFloat($(e.target).val()));
         });

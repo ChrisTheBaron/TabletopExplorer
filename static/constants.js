@@ -8,6 +8,10 @@ const lsSceneName = "scene";
 const lsShownHelp = 'shownHelp';
 const lsZoom = 'zoom';
 
+const lsSharingTopic = 'topic';
+const lsSharingKey = 'key';
+const lsSharingStarted = 'sharing';
+
 const DefaultSceneName = 'scene_default';
 const DBName = 'tabletop.explorer';
 const TokenImageDocumentName = "tokens";

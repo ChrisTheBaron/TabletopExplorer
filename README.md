@@ -32,6 +32,13 @@ number of maps you can have. Switch back and forth with ease.*
 *Painlessly set the scale of your map so you know your tokens will fit 
 perfectly.*
 
+![Sharing The Map](images/sharing.gif)
+
+*Show off your maps to your players with nothing more than a link to share with
+ them. No accounts needed.** 
+
+*Internet Connection Required
+
 ## How To Run
 
 Serve over ice using your preferred static content provider (Apache, Nginx, etc.).

@@ -7,6 +7,7 @@ import WebRTCStar from 'libp2p-webrtc-star'
 import { NOISE } from 'libp2p-noise'
 import Mplex from 'libp2p-mplex'
 import Gossipsub from 'libp2p-gossipsub'
+import CryptoJS from "crypto-js"
 
 document.addEventListener('DOMContentLoaded', async () => {
 
@@ -55,6 +56,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // could be caused by the image being updated.
         token.x = Math.min(imageDim.width - token.s, Math.max(0, token.x));
         token.y = Math.min(imageDim.height - token.s, Math.max(0, token.y));
+
+        if (!token.i) {
+            token.i = uuidv4();
+        }
 
         let tokenUrl = "";
 
@@ -343,6 +348,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let y = originY + (Math.floor(i / squareLength) * size / tokenBufferZoom);
 
             $(main).append(getTokenMarkup({
+                i: uuidv4(),
                 s: size,
                 x: x,
                 y: y,
@@ -433,6 +439,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let y = originY + (Math.floor(i / squareLength) * size / tokenBufferZoom);
 
                 $(main).append(getTokenMarkup({
+                    i: uuidv4(),
                     s: size,
                     x: x - (size / 2),
                     y: y - (size / 2),
@@ -447,6 +454,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
 
             $(main).append(getTokenMarkup({
+                i: uuidv4(),
                 s: size,
                 x: x - (size / 2),
                 y: y - (size / 2),
@@ -846,17 +854,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     let sharing = false;
 
     let startStopSharing = false;
-    $('#sharingForm').submit(async (e) => {
+    let regenerating = false;
+
+    $('#startStopSharing').click(async (e) => {
 
         e.preventDefault();
 
-        if (startStopSharing) return;
+        if (regenerating || startStopSharing) return;
 
         startStopSharing = true;
-        $('#sharingForm .spinner-border').show();
+        $('#startStopSharing .spinner-border').show();
 
         if (!sharing) {
-            sharing = true;
             console.log("Starting setting up sharing.");
             await startSharing();
             $('#startStopSharing')
@@ -865,7 +874,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .find('.message')
                 .text('Stop Sharing');
         } else {
-            sharing = false;
             console.log("Stopping sharing.");
             await stopSharing();
             $('#startStopSharing')
@@ -876,19 +884,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         startStopSharing = false;
-        $('#sharingForm .spinner-border').hide();
+        $('#startStopSharing .spinner-border').hide();
 
     });
 
     async function startSharing() {
-        // check ls for a seed value
-        // otherwise get one from RANDOM.ORG
 
-        // generate pub/priv key pair
+        let topic;
+        if (window.localStorage.getItem(lsSharingTopic) != null) {
+            topic = window.localStorage.getItem(lsSharingTopic);
+        } else {
+            topic = generateKey(5);
+            window.localStorage.setItem(lsSharingTopic, topic);
+        }
+
+        let key;
+        if (window.localStorage.getItem(lsSharingKey) != null) {
+            key = window.localStorage.getItem(lsSharingKey);
+        } else {
+            key = generateKey(5);
+            window.localStorage.setItem(lsSharingKey, key);
+        }
 
         ipfs = {
             peers: [],
-            topic: 'tabletop-explorer' //TODO Get this from query string
+            topic: topic,
+            key: key
         };
 
         // Create our libp2p node
@@ -936,7 +957,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await ipfs.gsub.start();
         console.log(`libp2p and gsub started`);
 
-        ipfs.gsub.subscribe(ipfs.topic);
+        await ipfs.gsub.subscribe(ipfs.topic);
         console.log(`subscribed to topic: '${ipfs.topic}'`);
 
         ipfs.gsub.on(ipfs.topic, (data) => {
@@ -944,30 +965,71 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         ipfs.interval = setInterval(async () => {
-            console.log("broadcast!");
-            ipfs.gsub.publish(ipfs.topic, new TextEncoder().encode(JSON.stringify(await db.ReadScene(sceneName))))
+            let scene = await db.ReadScene(sceneName);
+            let background = await db.ReadMap(scene.background);
+            scene.background = await blobToBase64(background);
+            for (let i = 0; i < scene.tokens.length; i++) {
+                if (scene.tokens[i].b) {
+                    let token = await db.ReadToken(scene.tokens[i].b);
+                    scene.tokens[i].b = await blobToBase64(token);
+                }
+            }
+            console.log(scene);
+            ipfs.gsub.publish(ipfs.topic, new TextEncoder().encode(CryptoJS.AES.encrypt(JSON.stringify(scene), ipfs.key).toString()));
         }, 1000);
 
-        $('#sharingLink').val(location.protocol + '//' + location.host + '/viewer/#' + ipfs.topic);
+        $('#sharingLink').val(location.protocol + '//' + location.host + '/viewer/?t=' + ipfs.topic + '&k=' + ipfs.key);
+
+        window.localStorage.setItem(lsSharingStarted, lsSharingStarted);
+
+        sharing = true;
 
     }
 
     async function stopSharing() {
-
         // broadcast stop message
-
         // clear ls seed value
-
         clearInterval(ipfs.interval);
-
         ipfs.gsub.unsubscribe(ipfs.topic);
         await ipfs.gsub.stop();
         await ipfs.libp2p.stop();
-
         ipfs = null;
+        window.localStorage.removeItem(lsSharingStarted);
+        $('#shareCount').text("");
+        sharing = false;
+    }
 
-        return new Promise((resolve) => { setTimeout(resolve, 2000) });
+    $('#regenerateKey').click(async (e) => {
 
+        e.preventDefault();
+
+        if (regenerating || startStopSharing) return;
+
+        regenerating = true;
+        $('#regenerateKey .spinner-border').show();
+
+        let wasSharing = sharing;
+
+        if (sharing) {
+            await stopSharing();
+        }
+
+        window.localStorage.removeItem(lsSharingTopic);
+        window.localStorage.removeItem(lsSharingKey);
+
+        if (wasSharing) {
+            await startSharing();
+        } else {
+            $('#sharingLink').val('');
+        }
+
+        regenerating = false;
+        $('#regenerateKey .spinner-border').hide();
+
+    });
+
+    if (window.localStorage.getItem(lsSharingStarted) == lsSharingStarted) {
+        $('#startStopSharing').click();
     }
 
     //------------------------------------------------------------------------
@@ -977,6 +1039,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         for (let r of $(main).find('.draggable')) {
             let rect = $(r);
             tokens.push({
+                i: rect.attr('data-i'),
                 x: rect.attr('data-x'),
                 y: rect.attr('data-y'),
                 s: rect.attr('data-s'),
