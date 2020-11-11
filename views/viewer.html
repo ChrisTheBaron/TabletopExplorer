@@ -1,0 +1,187 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Tabletop Explorer">
+    <meta name="apple-mobile-web-app-title" content="Tabletop Explorer">
+    <meta name="msapplication-starturl" content="https://tabletop-explorer.christhebaron.co.uk">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+    <meta name="description" content="">
+
+    <title>Tabletop Explorer</title>
+
+    <link rel="stylesheet" href="/static/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/lib/fontawesome-free-5.15.1-web/css/all.min.css">
+
+    <link rel="stylesheet" href="/static/styles/main.css">
+
+    <script src="/static/lib/modernizr.js"></script>
+    <script>
+        for (let i of Object.keys(Modernizr)) {
+            if (Modernizr[i] === false) {
+                location.replace("https://browsehappy.com/");
+            }
+        }
+    </script>
+
+</head>
+<body>
+
+    <div class="alert alert-warning d-sm-none position-absolute" role="alert">
+        This application is best enjoyed on a screen wider than 576px.
+        <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div id="loading" class="alert alert-info">
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...
+    </div>
+
+    <main id="main">
+
+    </main>
+
+    <nav class="navbar fixed-bottom navbar-dark bg-dark">
+        <div class="container-fluid">
+            <form class="d-flex align-items-center">
+
+                <div class="mr-3 control">
+                    <input type="range" class="form-range" min="0.25" max="3" step="0.0005" id="zoomInput" title="Zoom">
+                </div>
+
+                <div class="btn-group mr-3 control" role="group" aria-label="Set Zoom">
+                    <a class="btn btn-outline-info" title="Fit To Height" id="fitHeight">
+                        <i class="fas fa-arrows-alt-v"></i>
+                    </a>
+                    <a class="btn btn-outline-info" title="Fit To Width" id="fitWidth">
+                        <i class="fas fa-arrows-alt-h"></i>
+                    </a>
+                    <a class="btn btn-outline-info" title="Fit To Screen" id="fitScreen">
+                        <i class="fas fa-arrows-alt"></i>
+                    </a>
+                </div>
+
+                <a class="btn btn-outline-info mr-3 control" data-toggle="modal" data-target="#helpModal" title="Help">
+                    <i class="fas fa-question"></i>
+                </a>
+
+            </form>
+        </div>
+    </nav>
+
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-fullscreen-sm-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="helpModalLabel">Help</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="accordion" id="accordionExample">
+                        <div class="card">
+                            <div class="card-header p-0" id="headingOne">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-light btn-block text-left p-3 rounded-0" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                        Introduction
+                                    </button>
+                                </h2>
+                            </div>
+
+                            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <h1 class="display-4">Tabletop Explorer</h1>
+                                    <p>
+                                        <img src="/static/images/android-chrome-192x192.png" />
+                                    </p>
+                                    <p>
+                                        Welcome to Tabletop Explorer. A simple,
+                                        game-agnostic tabletop map simulator.
+                                        Optimised for Desktop and Tablets
+                                        (mobile coming soon). Everything is
+                                        stored in your browser, no internet
+                                        connection needed, no servers to
+                                        connect to, no accounts to create. Any
+                                        changes will be saved in your browser,
+                                        so everything will be here ready for
+                                        your next session.
+                                    </p>
+                                    <p>
+                                        See the sections below for more
+                                        information, or simply click the
+                                        <button type="button" class="btn-close"></button>
+                                        at the top to get straight into it. You
+                                        can always get back here by clicking
+                                        the
+                                        <i class="fas fa-question text-info"></i>
+                                        at the bottom of the screen.
+                                    </p>
+                                    <p>
+                                        <a href='https://ko-fi.com/christhebaron' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://cdn.ko-fi.com/cdn/kofi2.png?v=2' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+                                    </p>
+                                    <p>
+                                        <i class="fa fa-external-link-alt"></i> MIT License - Copyright (c) 2020 Chris Taylor
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header p-0" id="headingTwo">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-light btn-block text-left collapsed p-3 rounded-0" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                        Dealing With Maps
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                                <div class="card-body">
+                                    <h3 class="h5">
+                                        Zooming
+                                    </h3>
+                                    <p>
+                                        Use the slider at the bottom of the
+                                        screen to adjust the zoom level. There
+                                        are also the following functions:
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            <i class="fas fa-arrows-alt-v text-info"></i>
+                                            Fit zoom to screen height
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-arrows-alt-h text-info"></i>
+                                            Fit zoom to screen width
+                                        </li>
+                                        <li>
+                                            <i class="fas fa-arrows-alt text-info"></i>
+                                            Fit zoom to screen size
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/lib/bootstrap.bundle.min.js"></script>
+    <script src="/static/lib/jquery-3.5.1.min.js"></script>
+    <script src="/static/lib/crypto-js-4.0.0/crypto-js.js"></script>
+
+    <script src="/static/scripts/constants.js"></script>
+    <script src="/static/scripts/zoom.js"></script>
+    <script src="/static/scripts/utils.js"></script>
+    <script src="/static/scripts/viewer.js"></script>
+
+</body>
+</html>

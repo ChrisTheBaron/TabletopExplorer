@@ -1,6 +1,6 @@
 # Tabletop Explorer
 
-![Logo](images/android-chrome-192x192.png)
+![Logo](static/images/android-chrome-192x192.png)
 
 Welcome to Tabletop Explorer. A simple, game-agnostic tabletop map simulator.
 Optimised for Desktop and Tablets (mobile coming soon). Everything is stored in
@@ -11,28 +11,28 @@ accounts to create.
 
 ## Features
 
-![Moving Tokens](images/moving.gif)
+![Moving Tokens](static/images/moving.gif)
 
 *Show off your carefully designed maps in all their glorious detail. You'll be
 able to effortlessly tell your characters exactly how far away their next fight
 is.*
 
-![Adding Tokens](images/adding-tokens.gif)
+![Adding Tokens](static/images/adding-tokens.gif)
 
 *Quickly add any number of tokens to the map, saving your PC's tokens so you 
 don't waste any time getting them into their next deadly encounter.*
 
-![Adding New Scene](images/adding-scene.gif)
+![Adding New Scene](static/images/adding-scene.gif)
 
 *There's no limits to the places your characters can go, and no limits to the 
 number of maps you can have. Switch back and forth with ease.*
 
-![Setting Map Scale](images/sizing.gif)
+![Setting Map Scale](static/images/sizing.gif)
 
 *Painlessly set the scale of your map so you know your tokens will fit 
 perfectly.*
 
-![Sharing The Map](images/sharing.gif)
+![Sharing The Map](static/images/sharing.gif)
 
 *Show off your maps to your players with nothing more than a link to share with
  them. No accounts needed.** 
@@ -42,6 +42,23 @@ perfectly.*
 ## How To Run
 
 Serve over ice using your preferred static content provider (Apache, Nginx, etc.).
+
+## Endpoints
+
+- `GET /` - Main page
+- `GET /static` - Static resources (css, js, etc.)
+- `GET /viewer/{id}/{key}` - Read-only viewing page
+- `POST /share` - returns a unique endpoint `id` to start sharing from and a 
+write `key` for the leader.
+- `HEAD /share/{id}/resource/{hash}` - Returns 200 if a resource has 
+already been uploaded, otherwise 404
+- `POST /share/{id}/resource/{hash}` - Upload a resource for the share
+- `GET /share/{id}/resource/{hash}` - Gets a resource for the share
+- `SSE /share/{id}/` - subscribe to the share. 
+- `POST /share/{id}/update` - Messages accompanied by the 
+write `key` will be broadcast to all subscribers, otherwise ignored.
+
+_N.B. It's up to the client to create an encryption key and share it with viewers._
 
 ## Credits
 
