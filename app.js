@@ -70,8 +70,8 @@ app.get('/share/:shareId/resource/:resId', async (req, res) => {
 app.post('/share/:shareId/update', bodyParser.text({ type: 'text/plain' }), (req, res) => {
     if (rooms[req.params.shareId] != null) {
         if (req.headers.authorization == rooms[req.params.shareId].write) {
-            rooms[req.params.shareId].sse.send(req.body);
             res.sendStatus(200);
+            rooms[req.params.shareId].sse.send(req.body);
         } else {
             res.sendStatus(403);
         }
@@ -80,9 +80,9 @@ app.post('/share/:shareId/update', bodyParser.text({ type: 'text/plain' }), (req
     }
 });
 
-app.get('/share/:shareId', (req, res) => {
+app.get('/share/:shareId', (req, res, next) => {
     if (rooms[req.params.shareId] != null) {
-        rooms[req.params.shareId].sse.init(req, res);
+        rooms[req.params.shareId].sse.init(req, res, next);
     }
 });
 
