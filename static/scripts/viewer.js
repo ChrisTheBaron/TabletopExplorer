@@ -1,47 +1,49 @@
+const main = document.getElementById(mainTagID);
+
+const urlParams = new URLSearchParams(window.location.search);
+const topic = urlParams.get('t') || '';
+const key = urlParams.get('k') || '';
+
+if (topic.trim() == '' || key.trim() == '') {
+    alert("Invalid link");
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
-
-    const main = document.getElementById(mainTagID);
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const topic = urlParams.get('t') || '';
-    const key = urlParams.get('k') || '';
-
-    if (topic.trim() == '' || key.trim() == '') {
-        alert("Invalid link");
-        return;
-    }
 
     // only bother updating when the revision changes
     let revision = '';
+    let backgroundId = '';
 
     var es = new EventSource(`/share/${topic}`);
 
     es.onmessage = async function (event) {
 
-        $('#loading').hide();
-
         let cypherText = JSON.parse(event.data);
-        let bytes = CryptoJS.TripleDES.decrypt(cypherText, key);
+        let bytes = CryptoJS.Rabbit.decrypt(cypherText, key);
         let plainText = bytes.toString(CryptoJS.enc.Utf8);
         let scene = JSON.parse(plainText);
 
         if (scene._rev != revision) {
 
-            console.log("scene", scene);
-
-            let backgroundEncrypted = await $.get(`/share/${topic}/resource/${scene.background}`);
-            let bytes = CryptoJS.TripleDES.decrypt(backgroundEncrypted, key);
-            let background = bytes.toString(CryptoJS.enc.Utf8);
-
-            let imageDim = await getImageDisplayDimensions(background, scene.background_zoom);
-
-            main.style.backgroundImage = `url('${background}')`;
-            main.style.height = `${imageDim.height}em`;
-            main.style.width = `${imageDim.width}em`;
-
             $('title').text(`${scene.name} - Tabletop Explorer`);
 
-            InitZoom(imageDim);
+            if (backgroundId != scene.background) {
+
+                let backgroundEncrypted = await $.get(`/share/${topic}/resource/${scene.background}`);
+                let bytes = CryptoJS.Rabbit.decrypt(backgroundEncrypted, key);
+                let background = bytes.toString(CryptoJS.enc.Utf8);
+
+                let imageDim = await getImageDisplayDimensions(background, scene.background_zoom);
+
+                main.style.backgroundImage = `url('${background}')`;
+                main.style.height = `${imageDim.height}em`;
+                main.style.width = `${imageDim.width}em`;
+
+                InitZoom(imageDim);
+
+                backgroundId = scene.background;
+
+            }
 
             // we'll get a list of the current token ID's so we know what we're
             // doing to each one. IE. add, modify, remove
@@ -52,21 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let remove = difference(currentTokens, newTokens);
             let edit = intersection(currentTokens, newTokens);
 
-            for (let id of add) {
-                let token = scene.tokens.find(t => t.i == id);
-
-                let tokenImage = '';
-                if (token.b) {
-                    let tokenImageEncrypted = await $.get(`/share/${topic}/resource/${token.b}`);
-                    let bytes = CryptoJS.TripleDES.decrypt(tokenImageEncrypted, key);
-                    tokenImage = bytes.toString(CryptoJS.enc.Utf8);
-                }
-
-                $(main).append(getTokenMarkup(token, tokenImage));
-            }
-
             for (let id of remove) {
-                console.log("removing", id);
                 $(main).find(`[data-i="${id}"]`).remove();
             }
 
@@ -79,12 +67,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .css('transform', `translate(${token.x}em, ${token.y}em)`);
             }
 
+            await Promise.all(Array.from(add).map(id => addToken(scene.tokens.find(t => t.i == id))));
+
             revision = scene._rev;
         }
+
+        $('#loading').hide();
 
     };
 
 })
+
+async function addToken(token) {
+    let tokenImage = '';
+    if (token.b) {
+        let tokenImageEncrypted = await $.get(`/share/${topic}/resource/${token.b}`);
+        let bytes = CryptoJS.Rabbit.decrypt(tokenImageEncrypted, key);
+        tokenImage = bytes.toString(CryptoJS.enc.Utf8);
+    }
+    $(main).append(getTokenMarkup(token, tokenImage));
+}
 
 function intersection(setA, setB) {
     let _intersection = new Set()

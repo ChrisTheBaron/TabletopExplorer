@@ -935,7 +935,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
             let plainText = JSON.stringify(scene);
-            let cypherText = CryptoJS.TripleDES.encrypt(plainText, share.key).toString();
+            let cypherText = CryptoJS.Rabbit.encrypt(plainText, share.key).toString();
             await $.ajax({
                 url: `/share/${share.topic}/update`,
                 type: 'post',
@@ -965,7 +965,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // don't need to do anything
         } catch (e) {
             if (e.status == 404) {
-                let cypherText = CryptoJS.TripleDES.encrypt(data, share.key).toString();
+                let cypherText = CryptoJS.Rabbit.encrypt(data, share.key).toString();
                 await $.ajax({
                     url: `/share/${share.topic}/resource/${name}`,
                     type: 'post',
