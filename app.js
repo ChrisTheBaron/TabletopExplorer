@@ -30,7 +30,7 @@ app.post('/share', function (req, res, next) {
     res.json({ topic, write });
 })
 
-app.post('/share/:shareId/resource/:resId', bodyParser.text({ type: 'text/plain', limit: '5MB' }), async (req, res) => {
+app.post('/share/:shareId/resource/:resId', bodyParser.text({ type: 'text/plain' }), async (req, res) => {
     if (rooms[req.params.shareId] != null &&
         req.headers.authorization == rooms[req.params.shareId].write) {
         fs.exists(__dirname + '/uploads/' + req.params.shareId + '-' + req.params.resId, (exists) => {
