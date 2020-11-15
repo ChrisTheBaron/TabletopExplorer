@@ -929,11 +929,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         share.interval = setInterval(async () => {
             let scene = await db.ReadScene(sceneName);
             let background = await db.ReadMap(scene.background);
-            await uploadResource(scene.background, await blobToBase64(background), share);
+            await uploadResource(scene.background, background, share);
             for (let i = 0; i < scene.tokens.length; i++) {
                 if (scene.tokens[i].b) {
                     let token = await db.ReadToken(scene.tokens[i].b);
-                    await uploadResource(scene.tokens[i].b, await blobToBase64(token), share);
+                    await uploadResource(scene.tokens[i].b, token, share);
                 }
             }
             let plainText = JSON.stringify(scene);
@@ -957,6 +957,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     }
 
+    /**
+     * 
+     * @param {string} name
+     * @param {Blob} data
+     * @param {string} share
+     */
     async function uploadResource(name, data, share) {
         try {
             await $.ajax({
@@ -967,16 +973,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             // don't need to do anything
         } catch (e) {
             if (e.status == 404) {
-                let cypherText = CryptoJS.Rabbit.encrypt(data, share.key).toString();
-                await $.ajax({
-                    url: `/share/${share.topic}/resource/${name}`,
-                    type: 'post',
-                    data: cypherText,
-                    contentType: 'text/plain',
-                    headers: {
-                        authorization: share.write
-                    }
+                new Compressor(data, {
+                    convertSize: 1000000, // 1MB
+                    success: async function (result) {
+                        let b64 = await blobToBase64(result);
+                        let cypherText = CryptoJS.Rabbit.encrypt(b64, share.key).toString();
+                        await $.ajax({
+                            url: `/share/${share.topic}/resource/${name}`,
+                            type: 'post',
+                            data: cypherText,
+                            contentType: 'text/plain',
+                            headers: {
+                                authorization: share.write
+                            }
+                        });
+                    },
+                    error(err) {
+                        console.log(err.message);
+                    },
                 });
+            } else {
+                console.log(e);
             }
         }
     }
