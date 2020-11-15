@@ -31,6 +31,14 @@ nav {
     position: absolute; /*so they don't stack*/
 }
 
+#main.server .token[data-v="0"] {
+    color: red;
+}
+
+#main.viewer .token[data-v="0"] {
+    display: none;
+}
+
 .token .image {
     width: 100%;
     height: 100%;

@@ -276,7 +276,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         }).on('doubletap', async function (event) {
             event.preventDefault()
-            $(event.currentTarget).attr('data-r', (parseInt($(event.currentTarget).attr('data-r')) + 1) % 4);
+            $(event.currentTarget).attr('data-v', (parseInt($(event.currentTarget).attr('data-v')) + 1) % 2);
+            //$(event.currentTarget).attr('data-r', (parseInt($(event.currentTarget).attr('data-r')) + 1) % 4);
             await saveTokensToDB();
         });
 
@@ -351,7 +352,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 b: imageAttachmentName,
                 f: colour,
                 l: label,
-                r: 0
+                r: 0,
+                v: 0
             }, image));
 
             i++;
@@ -1037,7 +1039,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 f: r.style.backgroundColor,
                 l: rect.attr('data-l'),
                 b: rect.attr('data-b'),
-                r: rect.attr('data-r')
+                r: rect.attr('data-r'),
+                v: rect.attr('data-v')
             });
         }
         await db.UpdateScene(sceneName, { tokens });

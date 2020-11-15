@@ -93,6 +93,7 @@ function getTokenMarkup(token, imageUrl) {
             data-s="${token.s || 1}" 
             data-b="${token.b || ''}"
             data-r="${token.r || 0}"
+            data-v="${token.v || 0}"
             style="
                 transform: translate(${token.x}em, ${token.y}em);
                 background-color: ${token.f || '#00000000'};

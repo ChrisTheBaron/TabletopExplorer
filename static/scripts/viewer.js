@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .attr('data-x', token.x)
                     .attr('data-y', token.y)
                     .attr('data-r', token.r)
+                    .attr('data-v', token.v)
                     .css('transform', `translate(${token.x}em, ${token.y}em)`);
             }
 
