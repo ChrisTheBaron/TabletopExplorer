@@ -524,10 +524,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (addingMask) return;
 
         let number = parseInt($('#addMaskModal #maskNumberInput').val());
-        let width = parseInt($('#addMaskModal #maskWidthInput').val()) * gridSize;
-        let height = parseInt($('#addMaskModal #maskHeightInput').val()) * gridSize;
+        let width = parseFloat($('#addMaskModal #maskWidthInput').val()) * gridSize;
+        let height = parseFloat($('#addMaskModal #maskHeightInput').val()) * gridSize;
 
-        if (number < 1 || width < 1 || height < 1) {
+        if (number < 1 || width < 0.5 || height < 0.5) {
             return false;
         }
 
