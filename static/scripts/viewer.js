@@ -18,40 +18,44 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     es.onmessage = async function (event) {
 
-        let cypherText = JSON.parse(event.data);
-        let bytes = CryptoJS.Rabbit.decrypt(cypherText, key);
-        let plainText = bytes.toString(CryptoJS.enc.Utf8);
-        let scene = JSON.parse(plainText);
+        try {
+            let cypherText = JSON.parse(event.data);
+            let bytes = CryptoJS.Rabbit.decrypt(cypherText, key);
+            let plainText = bytes.toString(CryptoJS.enc.Utf8);
+            let scene = JSON.parse(plainText);
 
-        if (scene._rev != revision) {
+            if (scene._rev != revision) {
 
-            $('title').text(`${scene.name} - Tabletop Explorer`);
+                $('title').text(`${scene.name} - Tabletop Explorer`);
 
-            if (backgroundId != scene.background) {
+                if (backgroundId != scene.background) {
 
-                let backgroundEncrypted = await $.get(`/share/${topic}/resource/${scene.background}`);
-                let bytes = CryptoJS.Rabbit.decrypt(backgroundEncrypted, key);
-                let background = bytes.toString(CryptoJS.enc.Utf8);
+                    let backgroundEncrypted = await $.get(`/share/${topic}/resource/${scene.background}`);
+                    let bytes = CryptoJS.Rabbit.decrypt(backgroundEncrypted, key);
+                    let background = bytes.toString(CryptoJS.enc.Utf8);
 
-                let imageDim = await getImageDisplayDimensions(background, scene.background_zoom);
+                    let imageDim = await getImageDisplayDimensions(background, scene.background_zoom);
 
-                main.style.backgroundImage = `url('${background}')`;
-                main.style.height = `${imageDim.height}em`;
-                main.style.width = `${imageDim.width}em`;
+                    main.style.backgroundImage = `url('${background}')`;
+                    main.style.height = `${imageDim.height}em`;
+                    main.style.width = `${imageDim.width}em`;
 
-                InitZoom(imageDim);
+                    InitZoom(imageDim);
 
-                backgroundId = scene.background;
+                    backgroundId = scene.background;
 
+                }
+
+                await updateTokens(scene.tokens);
+                await updateMasks(scene.masks || []);
+
+                revision = scene._rev;
             }
 
-            await updateTokens(scene.tokens);
-            await updateMasks(scene.masks || []);
-
-            revision = scene._rev;
+            $('#loading').hide();
+        } catch (ex) {
+            $('#loading').show();
         }
-
-        $('#loading').hide();
 
     };
 
