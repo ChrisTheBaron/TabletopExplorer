@@ -64,6 +64,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
     }
+
+    //------------------------------------------------------------------------
+    // Masks
+    {
+
+        for (let mask of scene.masks || []) {
+            // check for ones that are out of bounds, 
+            // could be caused by the image being updated.
+            mask.x = Math.min(imageDim.width - mask.w, Math.max(0, mask.x));
+            mask.y = Math.min(imageDim.height - mask.h, Math.max(0, mask.y));
+
+            if (!mask.i) {
+                mask.i = uuidv4();
+            }
+
+            $(main).append(getMaskMarkup(mask));
+        }
+
+    }
     //------------------------------------------------------------------------
     // Favourites Tokens
     {
@@ -217,20 +236,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 start(event) {
                     $(event.target).addClass("dragging");
-                    var target = event.target;
-                    var x = (parseFloat(target.getAttribute('data-x')) || 0);
-                    var y = (parseFloat(target.getAttribute('data-y')) || 0);
-                    startPosition = { x, y };
-                    $('#distanceMoved').text(`0 ${scene.unit}`).show();
+                    if ($(event.target).hasClass('token')) {
+                        var target = event.target;
+                        var x = (parseFloat(target.getAttribute('data-x')) || 0);
+                        var y = (parseFloat(target.getAttribute('data-y')) || 0);
+                        startPosition = { x, y };
+                        $('#distanceMoved').text(`0 ${scene.unit}`).show();
+                    }
                 },
 
                 end: async function (event) {
                     $(event.target).removeClass("dragging");
-                    await saveTokensToDB();
-                    setTimeout(() => {
-                        $('#distanceMoved').hide();
-                        $('#dragMarker').hide();
-                    }, 750);
+                    await saveTokensAndMasksToDB();
+                    if ($(event.target).hasClass('token')) {
+                        setTimeout(() => {
+                            $('#distanceMoved').hide();
+                            $('#dragMarker').hide();
+                        }, 750);
+                    }
                 },
 
                 // call this function on every dragmove event
@@ -248,27 +271,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                     target.setAttribute('data-x', x)
                     target.setAttribute('data-y', y)
 
-                    let pxDist = Math.sqrt(Math.pow(x - startPosition.x, 2) + Math.pow(y - startPosition.y, 2));
-                    let unitDist = (pxDist * scene.distance) / (gridSize);
+                    if ($(event.target).hasClass('token')) {
 
-                    let size = parseFloat(target.getAttribute('data-s')) / 2;
+                        let pxDist = Math.sqrt(Math.pow(x - startPosition.x, 2) + Math.pow(y - startPosition.y, 2));
+                        let unitDist = (pxDist * scene.distance) / (gridSize);
 
-                    let midX = startPosition.x + ((x - startPosition.x) / 2);
-                    let midY = startPosition.y + ((y - startPosition.y) / 2);
+                        let size = parseFloat(target.getAttribute('data-s')) / 2;
 
-                    $('#distanceMoved').css('transform', 'translate(' + (midX + size) + 'em, ' + (midY + size) + 'em)');
-                    $('#distanceMoved').attr('data-l', `${Math.round(unitDist)} ${scene.unit}`).show();
+                        let midX = startPosition.x + ((x - startPosition.x) / 2);
+                        let midY = startPosition.y + ((y - startPosition.y) / 2);
 
-                    let angle = Math.atan((y - startPosition.y) / (x - startPosition.x));
-                    if ((x - startPosition.x) < 0) {
-                        angle += Math.PI;
+                        $('#distanceMoved').css('transform', 'translate(' + (midX + size) + 'em, ' + (midY + size) + 'em)');
+                        $('#distanceMoved').attr('data-l', `${Math.round(unitDist)} ${scene.unit}`).show();
+
+                        let angle = Math.atan((y - startPosition.y) / (x - startPosition.x));
+                        if ((x - startPosition.x) < 0) {
+                            angle += Math.PI;
+                        }
+
+                        $('#dragMarker').css('transform', `rotate(${angle}rad)`);
+                        $('#dragMarker').css('width', `${pxDist}em`);
+                        $('#dragMarker').css('margin-top', `${startPosition.y + size}em`);
+                        $('#dragMarker').css('margin-left', `${startPosition.x + size}em`);
+                        $('#dragMarker').show();
                     }
-
-                    $('#dragMarker').css('transform', `rotate(${angle}rad)`);
-                    $('#dragMarker').css('width', `${pxDist}em`);
-                    $('#dragMarker').css('margin-top', `${startPosition.y + size}em`);
-                    $('#dragMarker').css('margin-left', `${startPosition.x + size}em`);
-                    $('#dragMarker').show();
 
                 }
 
@@ -278,21 +304,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             event.preventDefault()
             $(event.currentTarget).attr('data-v', (parseInt($(event.currentTarget).attr('data-v')) + 1) % 2);
             //$(event.currentTarget).attr('data-r', (parseInt($(event.currentTarget).attr('data-r')) + 1) % 4);
-            await saveTokensToDB();
+            await saveTokensAndMasksToDB();
         });
 
     $('main').on('click', '.draggable', async (e) => {
+        //TODO: Something going wrong here.
         if ($('#removeTokens').prop('checked')) {
             if ($(e.target).is('.draggable')) {
-                $(e.target).remove();
+                $(e.target).addClass("DELETED").remove();
             } else {
-                $(e.target).parent('.draggable').remove();
+                $(e.target).parent('.draggable').addClass("DELETED").remove();
             }
-            if ($('main').find('.draggable').length == 0) {
-                $('#removeTokens').click();
-            }
-            await saveTokensToDB();
         };
+        await saveTokensAndMasksToDB();
+        if ($('main').find('.draggable').length == 0) {
+            $('#removeTokens').click();
+        }
     });
 
     let addFavouritesTokenModal = document.getElementById('addFavouritesTokenModal');
@@ -362,7 +389,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let modal = bootstrap.Modal.getInstance(addFavouritesTokenModal);
         await modal.hide();
-        await saveTokensToDB();
+        await saveTokensAndMasksToDB();
 
         addingFavouritesToken = false;
         $('#addingFavouritesTokenSpinner').hide();
@@ -466,7 +493,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let modal = bootstrap.Modal.getInstance(addTokenModal);
         await modal.hide();
-        await saveTokensToDB();
+        await saveTokensAndMasksToDB();
 
         if (save) {
             await db.CreateFavouriteToken({
@@ -480,6 +507,75 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         addingToken = false;
         $('#addingTokenSpinner').hide();
+
+    });
+
+    let addMaskModal = document.getElementById('addMaskModal');
+
+    addMaskModal.addEventListener('show.bs.modal', () => {
+        $('#addMaskModal form')[0].reset();
+    })
+
+    let addingMask = false;
+    $('#addMaskForm').submit(async (e) => {
+
+        e.preventDefault();
+
+        if (addingMask) return;
+
+        let number = parseInt($('#addMaskModal #maskNumberInput').val());
+        let width = parseInt($('#addMaskModal #maskWidthInput').val()) * gridSize;
+        let height = parseInt($('#addMaskModal #maskHeightInput').val()) * gridSize;
+
+        if (number < 1 || width < 1 || height < 1) {
+            return false;
+        }
+
+        addingMask = true;
+        $('#addMaskForm .spinner-border').show();
+
+        let [x, y] = getCentreOfMapOnDisplay(imageDim, GetZoom());
+
+        if (number > 1) {
+
+            let squareLength = Math.ceil(Math.pow(number, 0.5));
+
+            let originX = x - (width * squareLength * 0.5);
+            let originY = y - (height * squareLength * 0.5);
+
+            for (let i = 0; i < number; i++) {
+
+                let x = originX + ((i % squareLength) * width);
+                let y = originY + (Math.floor(i / squareLength) * height);
+
+                $(main).append(getMaskMarkup({
+                    i: uuidv4(),
+                    w: width,
+                    h: height,
+                    x: x - (width / 2),
+                    y: y - (height / 2)
+                }));
+
+            }
+
+        } else {
+
+            $(main).append(getMaskMarkup({
+                i: uuidv4(),
+                w: width,
+                h: height,
+                x: x - (width / 2),
+                y: y - (height / 2)
+            }));
+
+        }
+
+        let modal = bootstrap.Modal.getInstance(addMaskModal);
+        await modal.hide();
+        await saveTokensAndMasksToDB();
+
+        addingMask = false;
+        $('#addingMaskSpinner').hide();
 
     });
 
@@ -540,7 +636,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             background: imageName
         });
 
-        await saveTokensToDB();
+        await saveTokensAndMasksToDB();
         location.reload();
 
     });
@@ -606,7 +702,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let imageType = image.split(';')[0].split(':')[1];
         let imageData = image.split(';')[1].split(',')[1];
 
-        await saveTokensToDB();
+        await saveTokensAndMasksToDB();
 
         await db.CreateMap(imageName, imageData, imageType);
 
@@ -632,7 +728,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (id == null || id.trim().length == 0) {
             return;
         }
-        await saveTokensToDB();
+        await saveTokensAndMasksToDB();
         window.localStorage.setItem(lsSceneName, id);
         location.reload();
     });
@@ -650,7 +746,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!confirm(`Are you sure you want to remove '${sceneToRemove.doc.name}'?`)) {
             return;
         }
-        await saveTokensToDB();
+        await saveTokensAndMasksToDB();
         await db.DeleteScene(id);
         location.reload();
     });
@@ -665,12 +761,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         let background_zoom = new_zoom * scene.background_zoom;
         await db.UpdateScene(sceneName, { background_zoom });
         console.log("New Zoom", background_zoom);
-        await saveTokensToDB();
+        await saveTokensAndMasksToDB();
         location.reload();
     });
 
     $('#cancelBackgroundSize').click(async () => {
-        await saveTokensToDB();
+        await saveTokensAndMasksToDB();
         location.reload();
     });
 
@@ -836,7 +932,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             editingScene = true;
             $('#editingScene').show();
 
-            await saveTokensToDB();
+            await saveTokensAndMasksToDB();
 
             await db.UpdateScene(sceneName, {
                 name: name,
@@ -1044,24 +1140,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     //------------------------------------------------------------------------
 
-    async function saveTokensToDB() {
+    async function saveTokensAndMasksToDB() {
         let tokens = [];
-        for (let r of $(main).find('.draggable')) {
+        let masks = [];
+        for (let r of $(main).find('.draggable:not(.DELETED)')) {
             let rect = $(r);
-            tokens.push({
-                i: rect.attr('data-i'),
-                x: rect.attr('data-x'),
-                y: rect.attr('data-y'),
-                s: rect.attr('data-s'),
-                f: r.style.backgroundColor,
-                l: rect.attr('data-l'),
-                b: rect.attr('data-b'),
-                r: rect.attr('data-r'),
-                v: rect.attr('data-v')
-            });
+            if (rect.hasClass('token')) {
+                tokens.push({
+                    i: rect.attr('data-i'),
+                    x: rect.attr('data-x'),
+                    y: rect.attr('data-y'),
+                    s: rect.attr('data-s'),
+                    f: r.style.backgroundColor,
+                    l: rect.attr('data-l'),
+                    b: rect.attr('data-b'),
+                    r: rect.attr('data-r'),
+                    v: rect.attr('data-v')
+                });
+            } else if (rect.hasClass('mask')) {
+                masks.push({
+                    i: rect.attr('data-i'),
+                    x: rect.attr('data-x'),
+                    y: rect.attr('data-y'),
+                    w: rect.attr('data-w'),
+                    h: rect.attr('data-h'),
+                    v: rect.attr('data-v')
+                });
+            } else {
+                console.error("Unknown draggable!", rect);
+            }
         }
-        await db.UpdateScene(sceneName, { tokens });
-        console.log("DB updated");
+        await db.UpdateScene(sceneName, { tokens, masks });
+        console.log(`DB updated. ${tokens.length} tokens. ${masks.length} masks`);
     }
 
 });
+

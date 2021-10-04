@@ -55,6 +55,10 @@
         <div class="container-fluid">
             <form class="d-flex align-items-center">
 
+                <a class="btn btn-outline-info mr-3 control" data-toggle="modal" data-target="#addMaskModal" title="Add Mask">
+                    <i class="fas fa-eye"></i>
+                </a>
+
                 <div class="btn-group mr-3 control" role="group" aria-label="Add Tokens">
                     <a class="btn btn-outline-success" data-toggle="modal" data-target="#addTokenModal" title="Add New Token">
                         <i class="fas fa-plus"></i>
@@ -66,14 +70,17 @@
 
                 <div class="form-check form-switch mr-3 control">
                     <input class="form-check-input" type="checkbox" id="removeTokens">
-                    <label class="form-check-label" for="removeTokens">Remove Tokens</label>
+                    <label class="form-check-label" for="removeTokens">Remove Tokens/Masks</label>
                 </div>
+
                 <a class="btn btn-outline-warning mr-3 control" data-toggle="modal" data-target="#editSceneModal" title="Edit Scene">
                     <i class="fas fa-image"></i>
                 </a>
+
                 <a class="btn btn-outline-info mr-3 control" data-toggle="modal" data-target="#changeSceneModal" title="Change Scene">
                     <i class="fas fa-images"></i>
                 </a>
+
                 <div class="mr-3 control">
                     <input type="range" class="form-range" min="0.25" max="3" step="0.0005" id="zoomInput" title="Zoom">
                 </div>
@@ -109,6 +116,50 @@
             </form>
         </div>
     </nav>
+
+    <div class="modal fade" id="addMaskModal" tabindex="-1" aria-labelledby="addMaskModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMaskModalLabel">Add Mask</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form autocomplete="off" id="addMaskForm">
+
+                        <div class="row mb-3">
+                            <label for="maskWidthInput" class="col-sm-2 col-form-label">Width</label>
+                            <div class="col-sm">
+                                <input required type="number" step="1" min="1" max="10" value="1" class="form-control" id="maskWidthInput">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="maskHeightInput" class="col-sm-2 col-form-label">Height</label>
+                            <div class="col-sm">
+                                <input required type="number" step="1" min="1" max="10" value="1" class="form-control" id="maskHeightInput">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="maskNumberInput" class="col-sm-2 col-form-label">Number</label>
+                            <div class="col-sm">
+                                <input required type="number" step="1" min="1" value="1" class="form-control" id="maskNumberInput">
+                            </div>
+                        </div>
+
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-success" id="addMask">
+                                <span style="display:none;" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                Add Mask
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="modal fade" id="addTokenModal" tabindex="-1" aria-labelledby="addTokenModalLabel" aria-hidden="true">
         <div class="modal-dialog">

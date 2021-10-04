@@ -29,6 +29,27 @@ nav {
     touch-action: none;
     user-select: none;
     position: absolute; /*so they don't stack*/
+    background-color: black;
+}
+
+    .draggable.mask {
+        outline: 2em solid;
+    }
+
+#main.server .token {
+    z-index: 2;
+}
+
+#main.server .mask {
+    z-index: 1;
+}
+
+#main.viewer .token {
+    z-index: 1;
+}
+
+#main.viewer .mask {
+    z-index: 2;
 }
 
 #main.server .token[data-v="0"] {
@@ -37,6 +58,26 @@ nav {
 
 #main.viewer .token[data-v="0"] {
     display: none;
+}
+
+#main.server .mask[data-v="1"] {
+    background-color: #dc354561;
+    outline-color: #dc354561;
+}
+
+#main.server .mask[data-v="0"] {
+    background-color: #19875433;
+    outline-color: #19875433;
+}
+
+#main.viewer .mask[data-v="1"] {
+    display: block;
+    outline-color: black;
+}
+
+#main.viewer .mask[data-v="0"] {
+    display: none;
+    outline-color: none;
 }
 
 .token .image {

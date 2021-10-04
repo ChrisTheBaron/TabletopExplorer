@@ -45,30 +45,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             }
 
-            // we'll get a list of the current token ID's so we know what we're
-            // doing to each one. IE. add, modify, remove
-            let currentTokens = new Set($(main).find('.token').get().map(t => $(t).attr('data-i')));
-            let newTokens = new Set(scene.tokens.map(t => t.i));
-
-            let add = difference(newTokens, currentTokens);
-            let remove = difference(currentTokens, newTokens);
-            let edit = intersection(currentTokens, newTokens);
-
-            for (let id of remove) {
-                $(main).find(`[data-i="${id}"]`).remove();
-            }
-
-            for (let id of edit) {
-                let token = scene.tokens.find(t => t.i == id);
-                $(main).find(`[data-i="${id}"]`)
-                    .attr('data-x', token.x)
-                    .attr('data-y', token.y)
-                    .attr('data-r', token.r)
-                    .attr('data-v', token.v)
-                    .css('transform', `translate(${token.x}em, ${token.y}em)`);
-            }
-
-            await Promise.all(Array.from(add).map(id => addToken(scene.tokens.find(t => t.i == id))));
+            await updateTokens(scene.tokens);
+            await updateMasks(scene.masks);
 
             revision = scene._rev;
         }
@@ -78,6 +56,68 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
 })
+
+async function updateMasks(masks) {
+
+    // we'll get a list of the current mask ID's so we know what we're
+    // doing to each one. IE. add, modify, remove
+    let currentMasks = new Set($(main).find('.mask').get().map(t => $(t).attr('data-i')));
+    let newMasks = new Set(masks.map(t => t.i));
+
+    let add = difference(newMasks, currentMasks);
+    let remove = difference(currentMasks, newMasks);
+    let edit = intersection(currentMasks, newMasks);
+
+    for (let id of remove) {
+        $(main).find(`[data-i="${id}"]`).remove();
+    }
+
+    for (let id of edit) {
+        let mask = masks.find(t => t.i == id);
+        $(main).find(`[data-i="${id}"]`)
+            .attr('data-x', mask.x)
+            .attr('data-y', mask.y)
+            .attr('data-r', mask.r)
+            .attr('data-v', mask.v)
+            .css('transform', `translate(${mask.x}em, ${mask.y}em)`);
+    }
+
+    await Promise.all(Array.from(add).map(id => addMask(masks.find(t => t.i == id))));
+
+}
+
+async function updateTokens(tokens) {
+
+    // we'll get a list of the current token ID's so we know what we're
+    // doing to each one. IE. add, modify, remove
+    let currentTokens = new Set($(main).find('.token').get().map(t => $(t).attr('data-i')));
+    let newTokens = new Set(tokens.map(t => t.i));
+
+    let add = difference(newTokens, currentTokens);
+    let remove = difference(currentTokens, newTokens);
+    let edit = intersection(currentTokens, newTokens);
+
+    for (let id of remove) {
+        $(main).find(`[data-i="${id}"]`).remove();
+    }
+
+    for (let id of edit) {
+        let token = tokens.find(t => t.i == id);
+        $(main).find(`[data-i="${id}"]`)
+            .attr('data-x', token.x)
+            .attr('data-y', token.y)
+            .attr('data-r', token.r)
+            .attr('data-v', token.v)
+            .css('transform', `translate(${token.x}em, ${token.y}em)`);
+    }
+
+    await Promise.all(Array.from(add).map(id => addToken(tokens.find(t => t.i == id))));
+
+}
+
+async function addMask(mask) {
+    $(main).append(getMaskMarkup(mask));
+}
 
 async function addToken(token) {
     let tokenImage = '';

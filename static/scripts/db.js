@@ -88,7 +88,8 @@ class DB {
                         b: golum,
                         r: 0
                     }
-                ]
+                ],
+                masks: []
             };
 
             await this._db.put(defaultScene);
@@ -107,7 +108,9 @@ class DB {
 
     async UpdateScene(sceneName, scene) {
         let oldScene = await this._db.get(sceneName);
-        $.extend(true, oldScene, scene);
+        for (let prop in scene) {
+            oldScene[prop] = scene[prop];
+        }
         await this._db.put(oldScene);
     }
 

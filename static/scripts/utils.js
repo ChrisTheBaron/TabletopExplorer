@@ -104,6 +104,22 @@ function getTokenMarkup(token, imageUrl) {
         </div>`;
 }
 
+function getMaskMarkup(mask) {
+    return `<div class="draggable mask"
+            data-i="${mask.i}"
+            data-x="${mask.x || 10}"    
+            data-y="${mask.y || 10}" 
+            data-w="${mask.w || 1}"
+            data-h="${mask.h || 1}"
+            data-v="${mask.v || 0}"
+            style="
+                transform: translate(${mask.x}em, ${mask.y}em);
+                width: ${mask.w || 1}em;
+                height: ${mask.h || 1}em;
+            ">
+        </div>`;
+}
+
 //https://stackoverflow.com/a/17373688
 function randomColor(brightness) {
     function randomChannel(brightness) {
