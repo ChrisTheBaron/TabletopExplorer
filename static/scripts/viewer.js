@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             await updateTokens(scene.tokens);
-            await updateMasks(scene.masks);
+            await updateMasks(scene.masks || []);
 
             revision = scene._rev;
         }
