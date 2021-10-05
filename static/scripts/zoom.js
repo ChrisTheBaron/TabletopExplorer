@@ -37,14 +37,14 @@ function InitZoom(imageDim) {
             let mainWidth = imageDim.width;
             let visibleWidth = window.innerWidth;
             console.log(mainWidth, visibleWidth);
-            $('#zoomInput').val(Math.max(0.25, Math.min(visibleWidth / mainWidth, 3))).trigger('input');
+            $('#zoomInput').val(Math.max(0.1, Math.min(visibleWidth / mainWidth, 2))).trigger('input');
         });
 
         $('#fitHeight').click(e => {
             let mainHeight = imageDim.height;
             let visibleHeight = window.innerHeight - navBarHeight;//nav
             console.log(mainHeight, visibleHeight);
-            $('#zoomInput').val(Math.max(0.25, Math.min(visibleHeight / mainHeight, 3))).trigger('input');
+            $('#zoomInput').val(Math.max(0.1, Math.min(visibleHeight / mainHeight, 2))).trigger('input');
         });
 
         $('#fitScreen').click(e => {
@@ -52,7 +52,7 @@ function InitZoom(imageDim) {
             let visibleHeight = window.innerHeight - navBarHeight;//nav
             let mainWidth = imageDim.width;
             let visibleWidth = window.innerWidth;
-            $('#zoomInput').val(Math.max(0.25, Math.min(Math.min(visibleWidth / mainWidth, visibleHeight / mainHeight), 3))).trigger('input');
+            $('#zoomInput').val(Math.max(0.1, Math.min(Math.min(visibleWidth / mainWidth, visibleHeight / mainHeight), 2))).trigger('input');
         });
 
     });
