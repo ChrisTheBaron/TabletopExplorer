@@ -346,6 +346,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let squareLength = Math.ceil(Math.pow(ticked.length, 0.5));
 
+        let favouriteTokens = await db.ReadAllFavouriteTokens();
+
         let biggestSize = Math.max(...favouriteTokens.tokens.map(t => t.s));
 
         let originX = x - (biggestSize * squareLength * 0.5 / tokenBufferZoom);
